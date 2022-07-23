@@ -48,16 +48,16 @@ def mc_main(end_plant_tuple, h2_demand, year=2021, centralised=True, pipeline=Tr
 
     return total_cost_per_kg_h2, generation_cost_per_kg, solar_cost, wind_cost
 
-
-# Define parameters for the main model
-end_tuple = [(23.0550, 113.4242), (29.6084, -95.0527)]  # [lat, long]
-h2_demand = [100]  # [kt/yr]
-year = [2030]
-centralised = True
-pipeline = True
-max_pipeline_dist = 10000
-iterations = 1000
-elec_type = ['alkaline']
+def set_parameters(latitude, longitude, demand, year, centralised, pipeline, max_dist, iterations, elec_type):
+    # Define parameters for the main model
+    end_tuple = (latitude, longitude)  # [lat, long]
+    h2_demand = demand  # [kt/yr]
+    year = year
+    centralised = centralised
+    pipeline = pipeline
+    max_pipeline_dist = max_dist
+    iterations = iterations
+    elec_type = elec_type
 
 for et in end_tuple:
     print('Location: ' + str(et))
