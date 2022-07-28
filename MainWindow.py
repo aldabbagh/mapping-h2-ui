@@ -1,176 +1,140 @@
 import sys
-from PyQt6 import QtGui, QtCore
+import ui_library
+from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import *
 
 
-class Window(QTabWidget):
+class UiWindow(QMainWindow):
     def __init__(self):
-        super(Window, self).__init__()
+        super(UiWindow, self).__init__()
         self.setWindowTitle("H2 mapping UI")
-        self.setGeometry(500, 200, 500, 500)
+        self.setGeometry(500, 200, 600, 400)
 
-        # create the tabs and load the uis
-        self.tab1 = QWidget()
-        self.tab2 = QWidget()
-        self.addTab(self.tab1, "single run")
-        self.addTab(self.tab2, "monte carlo simulation")
-        self.tab1ui()
-        self.tab2ui()
+        self.window = QWidget()
 
-    def tab1ui(self):
-        grid = QGridLayout()
+        self.grid = QGridLayout()
 
         # create labels for the coordinates, latitude and longitude
         # as well as input-boxes for latitude and longitude values
-        coord_label = QLabel("coordinates :")
-        long_label = QLabel("longitude :")
-        lat_label = QLabel("latitude :")
-        long_lineedit = QLineEdit()
-        lat_lineedit = QLineEdit()
+        self.coord_label = QLabel("coordinates :")
+        self.long_label = QLabel("longitude :")
+        self.lat_label = QLabel("latitude :")
+        self.long_lineedit = QLineEdit()
+        self.lat_lineedit = QLineEdit()
 
         # creates the year label and a combo box with the options of choosing 2020, 2030, 2040, 2050
-        year_label = QLabel("year :")
-        year_combo = QComboBox()
-        year_combo.addItems(["2020", "2030", "2040", "2050"])
+        self.year_label = QLabel("year :")
+        self.year_combo = QComboBox()
+        self.year_combo.addItems(["2020", "2030", "2040", "2050"])
 
         # creates the yearly hydrogen demand label and a spinbox that takes values between 1 and 1 million
         # the value can be changed in steps of 10 via the arrows
-        hhdemand_label = QLabel("yearly hydrogen demand :")
-        hhdemand_spinbox = QDoubleSpinBox()
-        hhdemand_spinbox.setRange(0, 1000000)
-        hhdemand_spinbox.setSingleStep(10)
+        self.hhdemand_label = QLabel("yearly hydrogen demand :")
+        self.hhdemand_spinbox = QDoubleSpinBox()
+        self.hhdemand_spinbox.setRange(0, 1000000)
+        self.hhdemand_spinbox.setSingleStep(10)
 
         # creates a checkbox to decide whether to allow pipelines as transport medium or not
-        pipe_checkbox = QCheckBox()
-        pipe_checkbox.setText("allow pipelines")
+        self.pipe_checkbox = QCheckBox()
+        self.pipe_checkbox.setText("allow pipelines")
 
         # creates a checkbox to decide whether to allow central conversion facilities
-        conversion_checkbox = QCheckBox()
-        conversion_checkbox.setText("allow central conversion")
+        self.conversion_checkbox = QCheckBox()
+        self.conversion_checkbox.setText("allow central conversion")
 
         # creates label and input box for
-        maxpipe_label = QLabel("maximum pipeline length :")
-        maxpipe_spinbox = QSpinBox()
-        maxpipe_spinbox.setRange(0, 20000)
-        maxpipe_spinbox.setSingleStep(10)
+        self.maxpipe_label = QLabel("maximum pipeline length :")
+        self.maxpipe_spinbox = QSpinBox()
+        self.maxpipe_spinbox.setRange(0, 20000)
+        self.maxpipe_spinbox.setSingleStep(10)
 
-        # creates a button to start the model run
-        run_button = QPushButton("run model")
+        # creates a checkbox with the option to toggle between single run and monte carlo sim
+        self.mc_checkbox = QCheckBox()
+        self.mc_checkbox.setText("run as monte-carlo-simulation")
 
-        # put longitude and latitude labels into horizontal layouts together with their lineedits
-        long_hbox = QHBoxLayout()
-        long_hbox.addWidget(long_label)
-        long_hbox.addWidget(long_lineedit)
-
-        lat_hbox = QHBoxLayout()
-        lat_hbox.addWidget(lat_label)
-        lat_hbox.addWidget(lat_lineedit)
-
-        # force the two checkboxes into vertical layout
-        allow_vbox = QVBoxLayout()
-        allow_vbox.addWidget(pipe_checkbox)
-        allow_vbox.addWidget((conversion_checkbox))
-
-        # arranges all widgets in a grid
-        grid.addWidget(coord_label, 0, 0)
-        grid.addLayout(long_hbox, 0, 1)
-        grid.addLayout(lat_hbox, 1, 1)
-        grid.addWidget(year_label, 3, 0)
-        grid.addWidget(year_combo, 3, 1)
-        grid.addWidget(hhdemand_label, 4, 0)
-        grid.addWidget(hhdemand_spinbox, 4, 1)
-        grid.addLayout(allow_vbox, 5, 1)
-        grid.addWidget(maxpipe_label, 6, 0)
-        grid.addWidget(maxpipe_spinbox, 6, 1)
-        grid.addWidget(run_button, 7, 3)
-
-        self.tab1.setLayout(grid)
-
-    def tab2ui(self):
-        grid = QGridLayout()
-
-        # create labels for the coordinates, latitude and longitude
-        # as well as input-boxes for latitude and longitude values
-        coord_label = QLabel("coordinates :")
-        long_label = QLabel("longitude :")
-        lat_label = QLabel("latitude :")
-        long_lineedit = QLineEdit()
-        lat_lineedit = QLineEdit()
-
-        # creates the year label and a combo box with the options of choosing 2020, 2030, 2040, 2050
-        year_label = QLabel("year :")
-        year_combo = QComboBox()
-        year_combo.addItems(["2020", "2030", "2040", "2050"])
-
-        # creates the yearly hydrogen demand label and a spinbox that takes values between 1 and 1 million
-        # the value can be changed in steps of 10 via the arrows
-        hhdemand_label = QLabel("yearly hydrogen demand :")
-        hhdemand_spinbox = QSpinBox()
-        hhdemand_spinbox.setRange(0, 1000000)
-        hhdemand_spinbox.setSingleStep(10)
-
-        # creates a checkbox to decide whether to allow pipelines as transport medium or not
-        pipe_checkbox = QCheckBox()
-        pipe_checkbox.setText("allow pipelines")
-
-        # creates a checkbox to decide whether to allow central conversion facilities
-        conversion_checkbox = QCheckBox()
-        conversion_checkbox.setText("allow central conversion")
-
-        # creates label and input box for
-        maxpipe_label = QLabel("maximum pipeline length :")
-        maxpipe_spinbox = QSpinBox()
-        maxpipe_spinbox.setRange(0, 20000)
-        maxpipe_spinbox.setSingleStep(10)
-
+        # creates optional parameter inputs for monte carlo sim
         # create label and lineedit to put in iterations
-        iter_label = QLabel("number of iterations")
-        iter_lineedit = QLineEdit()
+        self.iter_label = QLabel("number of iterations")
+        self.iter_lineedit = QLineEdit()
 
         # create combobox with electrolyzer options
-        electro_label = QLabel("electrolyzer type :")
-        electro_combo = QComboBox()
-        electro_combo.addItems(["soe", "alkaline", "pem"])
+        self.electro_label = QLabel("electrolyzer type :")
+        self.electro_combo = QComboBox()
+        self.electro_combo.addItems(["soe", "alkaline", "pem"])
+
+        # put labels and corresponding widgets into sub-layouts
+        self.iter_layout = QHBoxLayout()
+        self.iter_layout.addWidget(self.iter_label)
+        self.iter_layout.addWidget(self.iter_lineedit)
+
+        self.electro_layout = QHBoxLayout()
+        self.electro_layout.addWidget(self.electro_label)
+        self.electro_layout.addWidget(self.electro_combo)
+
+        self.sublayout = QVBoxLayout()
+        self.sublayout.addLayout(self.iter_layout)
+        self.sublayout.addLayout(self.electro_layout)
 
         # creates a button to start the model run
-        run_button = QPushButton("run model")
+        self.run_button = QPushButton("run model")
 
         # put longitude and latitude labels into horizontal layouts together with their lineedits
-        long_hbox = QHBoxLayout()
-        long_hbox.addWidget(long_label, )
-        long_hbox.addWidget(long_lineedit)
+        self.long_hbox = QHBoxLayout()
+        self.long_hbox.addWidget(self.long_label)
+        self.long_hbox.addWidget(self.long_lineedit)
 
-        lat_hbox = QHBoxLayout()
-        lat_hbox.addWidget(lat_label)
-        lat_hbox.addWidget(lat_lineedit)
+        self.lat_hbox = QHBoxLayout()
+        self.lat_hbox.addWidget(self.lat_label)
+        self.lat_hbox.addWidget(self.lat_lineedit)
 
         # force the two checkboxes into vertical layout
-        allow_vbox = QVBoxLayout()
-        allow_vbox.addWidget(pipe_checkbox)
-        allow_vbox.addWidget((conversion_checkbox))
+        self.allow_vbox = QVBoxLayout()
+        self.allow_vbox.addWidget(self.pipe_checkbox)
+        self.allow_vbox.addWidget(self.conversion_checkbox)
 
         # arranges all widgets in a grid
-        grid.addWidget(coord_label, 0, 0)
-        grid.addLayout(long_hbox, 0, 1)
-        grid.addLayout(lat_hbox, 1, 1)
-        grid.addWidget(year_label, 3, 0)
-        grid.addWidget(year_combo, 3, 1)
-        grid.addWidget(hhdemand_label, 4, 0)
-        grid.addWidget(hhdemand_spinbox, 4, 1)
-        grid.addLayout(allow_vbox, 5, 1)
-        grid.addWidget(maxpipe_label, 6, 0)
-        grid.addWidget(maxpipe_spinbox, 6, 1)
-        grid.addWidget(iter_label, 7, 0)
-        grid.addWidget(iter_lineedit, 7, 1)
-        grid.addWidget(electro_label, 8, 0)
-        grid.addWidget(electro_combo, 8, 1)
-        grid.addWidget(run_button, 8, 3)
+        self.grid.addWidget(self.coord_label, 0, 0)
+        self.grid.addLayout(self.long_hbox, 0, 1)
+        self.grid.addLayout(self.lat_hbox, 1, 1)
+        self.grid.addWidget(self.year_label, 3, 0)
+        self.grid.addWidget(self.year_combo, 3, 1)
+        self.grid.addWidget(self.hhdemand_label, 4, 0)
+        self.grid.addWidget(self.hhdemand_spinbox, 4, 1)
+        self.grid.addLayout(self.allow_vbox, 5, 1)
+        self.grid.addWidget(self.maxpipe_label, 6, 0)
+        self.grid.addWidget(self.maxpipe_spinbox, 6, 1)
+        self.grid.addWidget(self.mc_checkbox, 7, 1)
+        self.grid.addLayout(self.sublayout, 8, 1)
+        self.grid.addWidget(self.run_button, 9, 3)
 
-        self.tab2.setLayout(grid)
+        self.window.setLayout(self.grid)
+
+        self.iter_label.hide()
+        self.iter_lineedit.hide()
+        self.electro_label.hide()
+        self.electro_combo.hide()
+
+        self.setCentralWidget(self.window)
+
+        # connecting the toggling of the monte carlo checkbox to slot, extending the parameter inputs
+        self.mc_checkbox.stateChanged.connect(self.on_mc_checkbox)
+
+    def on_mc_checkbox(self):
+        if self.mc_checkbox.isChecked():
+            self.iter_label.show()
+            self.iter_lineedit.show()
+            self.electro_label.show()
+            self.electro_combo.show()
+
+        else:
+            self.iter_label.hide()
+            self.iter_lineedit.hide()
+            self.electro_label.hide()
+            self.electro_combo.hide()
 
 
 app = QApplication(sys.argv)
-window = Window()
-window.show()
+ui = UiWindow()
+ui.show()
 
 sys.exit(app.exec())
