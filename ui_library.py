@@ -4,6 +4,42 @@ from plot_results import *
 import timeit
 
 
+class ParameterSet:
+    def __init__(self):
+        # parameter initialisation
+        self.longitude = 0
+        self.latitude = 0
+        self.demand = 0
+        self.year = 2020
+        self.centralised = False
+        self.pipeline = False
+        self.max_dist = 0
+
+    # getter functions to be called by run_single_model because the signal can't pass on all the
+    # parameters as arguments
+
+    def get_long(self):
+        return self.longitude
+
+    def get_lat(self):
+        return self.latitude
+
+    def get_demand(self):
+        return self.demand
+
+    def get_year(self):
+        return self.year
+
+    def get_allow_centralised(self):
+        return self.centralised
+
+    def get_allow_pipeline(self):
+        return self.pipeline
+
+    def get_max_pipe_dist(self):
+        return self.max_dist
+
+
 def compute(end_tuple, h2_demand, year, centralised, pipeline, max_pipeline_dist):
     """Executes a single run of the complete model. Takes the desired end location [lat, long], the H2 demand (
     kt/yr), the year, if redistribution is centralised or not, if pipelines are allowed, and the maximum allowed
@@ -27,9 +63,19 @@ def compute(end_tuple, h2_demand, year, centralised, pipeline, max_pipeline_dist
     return df
 
 
-def run_single_model(latitude, longitude, demand, year, centralised, pipeline, max_dist):
-    # Define parameters for the main model
+
+def run_single_model():
+    # get parameters for the main model
+    latitude = ParameterSet.get_long
+    longitude = ParameterSet.get_lat
+
     end_tuple = (latitude, longitude)  # [lat, long]
+
+    demand = ParameterSet.get_demand
+    year = ParameterSet.get_year
+    centralised = ParameterSet.get_allow_centralised
+    pipeline = ParameterSet.get_allow_pipeline
+    max_dist = ParameterSet.get_max_pipe_dist
 
     # start timer
     start = timeit.default_timer()
