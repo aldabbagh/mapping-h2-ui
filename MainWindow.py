@@ -119,6 +119,11 @@ class UiWindow(QMainWindow):
         # connecting the toggling of the monte carlo checkbox to slot, extending the parameter inputs
         self.mc_checkbox.stateChanged.connect(self.on_mc_checkbox)
 
+        # instance of parameterSet
+        self.parameter_set = ui_library.ParameterSet()
+
+        self.computing = ui_library.Computing(self.parameter_set)
+
         # on run button press set parameter values equal to the current contents of their respective widgets
         # and start the run (passing over the parameter values)
         self.run_button.clicked.connect(self.set_long)
@@ -128,7 +133,7 @@ class UiWindow(QMainWindow):
         self.run_button.clicked.connect(self.set_allow_centralised)
         self.run_button.clicked.connect(self.set_allow_pipeline)
         self.run_button.clicked.connect(self.set_max_pipe_dist)
-        self.run_button.clicked.connect(ui_library.run_single_model)
+        self.run_button.clicked.connect(self.computing.run_single_model)
 
     def on_mc_checkbox(self):
         if self.mc_checkbox.isChecked():
@@ -147,37 +152,37 @@ class UiWindow(QMainWindow):
     def set_long(self):
         longitude = float(self.long_lineedit.text())
         print("The longitude was set to:" + str(longitude))
-        ui_library.ParameterSet.longitude = longitude
+        self.parameter_set.longitude = longitude
 
     def set_lat(self):
         latitude = float(self.lat_lineedit.text())
         print("The latitude was set to:" + str(latitude))
-        ui_library.ParameterSet.latitude = latitude
+        self.parameter_set.latitude = latitude
 
     def set_demand(self):
         demand = self.hhdemand_spinbox.value()
         print("The yearly demand was set to:" + str(demand))
-        ui_library.ParameterSet.demand = demand
+        self.parameter_set.demand = demand
 
     def set_year(self):
         year = int(self.year_combo.currentText())
         print("The year was set to:" + str(year))
-        ui_library.ParameterSet.year = year
+        self.parameter_set.year = year
 
     def set_allow_centralised(self):
         centralised = self.conversion_checkbox.isChecked()
         print("Centralised conversion is allowed :" + "true" if centralised else "false")
-        ui_library.ParameterSet.centralised = centralised
+        self.parameter_set.centralised = centralised
 
     def set_allow_pipeline(self):
         pipeline = self.pipe_checkbox.isChecked()
         print("Pipelines are allowed :" + str(pipeline))
-        ui_library.ParameterSet.pipeline = pipeline
+        self.parameter_set.pipeline = pipeline
 
     def set_max_pipe_dist(self):
         maxdist = self.maxpipe_spinbox.value()
         print("The maximum pipeline distance was set to:" + str(maxdist))
-        ui_library.ParameterSet.max_dist = maxdist
+        self.parameter_set.max_dist = maxdist
 
 
 app = QApplication(sys.argv)
