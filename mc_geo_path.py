@@ -5,8 +5,8 @@ import requests
 from scipy import spatial
 from Transport_cost_functions import *
 
-sys.path.append("C:/Users/Jo/Documents/Masterarbeit/mapping-h2-main/mapping-h2-main/shapefile_to_network/main/convertor")
-sys.path.append("C:/Users/Jo/Documents/Masterarbeit/mapping-h2-main/mapping-h2-main/shapefile_to_network/main/shortest_paths")
+sys.path.append("shapefile_to_network/main/convertor")
+sys.path.append("shapefile_to_network/main/shortest_paths")
 
 from shapefile_to_network.main.convertor.GraphConvertor import GraphConvertor
 from shapefile_to_network.main.shortest_paths.ShortestPath import ShortestPath
