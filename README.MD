@@ -12,7 +12,7 @@ This document aims to guide you through the installation and setup of Python and
 IDE, in this case PyCharm, in order to use the model. The guideline is aimed towards
 users who have never used Python before. Important note: this tutorial was put together
 for windows 10. So if you’re using another operating system, be aware that you will have
-to download certain files according to your machines software specifications. If you are a
+to download certain files according to your machines' software specifications. If you are a
 seasoned Python user you might want to skip to the package dependencies section or to the
 end of this document, where the model parameters are discussed.
 
@@ -29,11 +29,11 @@ the simulation can compute a distribution of hydrogen production costs. To cover
 globe, a network of 5970 points was constructed where renewable energy production from
 solar or wind would be feasible. Connecting these locations to their solar and wind energy
 potential, establishes a starting point for the calculation of the hydrogen production costs.
-In regards to the transport cost there are a lot of different factors. There are three modes of
-transportation available, which are truck, ship and pipeline. Furthermore the hydrogen itself
-can be transported in different states. It could be stored as-is in gaseous phase, liquified,
+In regards to the transport cost, there are a lot of different factors. There are three modes of
+transportation available, which are truck, ship and pipeline. Furthermore, the hydrogen itself
+can be transported in different states. It could be stored as-is in gaseous phase, liquefied,
 converted to Ammonia or to Toluene as an example for liquid organic hydrogen carriers
-(LOHC). Of course conversion and reconversion come with an added cost but they are
+(LOHC). Of course conversion and reconversion come with an added cost, but they are
 advantageous at longer distances because of their storage characteristics. According to the
 geographic location of the hydrogen-demanding facility the program will find the point with
 the cheapest combination of production and transport cost.
@@ -57,7 +57,7 @@ install all required packages:
 
 If that’s not the case, install the packages through requirements.txt.
 You can do this by putting pip install -r C:\Path\to\requirements.txt into the
-Terminal. Note that you need to fill in the path to the reuirements.txt file according to your
+Terminal. Note that you need to fill in the path to the requirements.txt file according to your
 folder structure. If the manual installation via requirements.txt doesn’t work either or when a
 package is missing, type pip install package_name (pandas, geopy, requests, scipy, GDAL,
 fiona, networkx, haversine, shapely, geopandas, plotly...) into the Terminal. Some packages
@@ -105,7 +105,7 @@ transport-intermediates (Ammonia, LOHC, lq. H2) is desired or omitted. The same 
 for the pipeline variable which either includes or excludes the usage of pipelines in the
 model. Lastly with the help of max_pipeline_dist you can put a restriction on the
 maximum length of a pipeline in kilometers, given that it is used in the model. 
-A summary of your results is shown in the console. Additionally The whole calculation 
+A summary of your results is shown in the console. Additionally, the whole calculation 
 results are stored in the ``Results'' folder. You will find the latest run under ``final\_df''. 
 The file is organized by rows and columns. The rows are simply the 5970 different locations,
 while the columns contain all the calculation steps from solar potential, over capital
@@ -117,16 +117,16 @@ In the Monte-Carlo-simulation there are two more parameters that you can set.
 
 Firstly you can set the number of iterations and secondly the electrolyzer technology
 by changing the elec_type parameter. The three technologies available are “alcaline” for
-alkaline electrolysis, “pem” for polymer electrolyte membrame electrolysis and “soe” for
+alkaline electrolysis, “pem” for polymer electrolyte membrane electrolysis and “soe” for
 solid oxide electrolysis. Also note that it’s possible to make the calculations for multiple
 locations at once by giving a list of coordinates. When all packages are installed and all
 files are in the correct folders main.py / mc_main.py should run and iterate. To run the
-main files, right-click on main.py / mc_main.py an click on run ’main’ or run ’mc_main’
+main files, right-click on main.py / mc_main.py and click on run ’main’ or run ’mc_main’
 respectively. Remember that a python interpreter has to be set before you can run the
 program. The Computing time depends on whether a new location is entered (meaning the
 shortest path algorithm has to run) or how many mc simulation iterations are desired. Of
 course the components of your PC also play a role. 
 Like in the main model you will find your results in the ``Results'' folder. 
-All Monte-Carlo-Simulation runs are stored in the ``mc'' subfolder and for every run 
+All Monte-Carlo-Simulation runs are stored in the ``mc'' sub folder and for every run 
 there will be an extra folder containing 4 csv-files. They are named according to their
 content and are organised by iterations as rows (e.g. 1000 iterations = 1000 rows) and locations in the columns. 
