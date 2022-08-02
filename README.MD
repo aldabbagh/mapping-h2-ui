@@ -63,12 +63,7 @@ package is missing, type pip install package_name (pandas, geopy, requests, scip
 fiona, networkx, haversine, shapely, geopandas, plotly...) into the Terminal. Some packages
 can not be downloaded from within PyCharm and have to be manually downloaded e.g. fiona
 and GDAL (wheels for a Windows 10 are delivered within the h2-mapping-directory). Use
-pip install path/to/.whl to install the package from a wheel-file. Now you will need to
-modify a few areas of the code in order to make it run on your own device. Certain paths
-in the code have to be set according to your own pc. Namely within the geo_path.py and
-mc_geo_path.py files. The sys.path.append() statements (lines 11 and 12) in geo_path.py
-need to be modified according to your computer’s folder structure. The same needs to be
-done in mc_geo_path.py for the lines 8 and 9.
+pip install path/to/.whl to install the package from a wheel-file.
 
 ## Interpreter configuration
 
