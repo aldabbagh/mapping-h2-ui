@@ -1,5 +1,6 @@
 import sys
 import ui_library
+import ParameterSet
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import *
 
@@ -120,7 +121,7 @@ class UiWindow(QMainWindow):
         self.mc_checkbox.stateChanged.connect(self.on_mc_checkbox)
 
         # instance of parameterSet
-        self.parameter_set = ui_library.ParameterSet()
+        self.parameter_set = ParameterSet.ParameterSet()
 
         self.computing = ui_library.Computing(self.parameter_set)
 
