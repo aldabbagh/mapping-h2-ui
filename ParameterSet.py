@@ -10,6 +10,8 @@ class ParameterSet:
         self.centralised = False
         self.pipeline = False
         self.max_dist = 0
+        self.iterations = 0
+        self.electrolyzer_type = 'alkaline'
 
     # getter functions to be called by run_single_model because the signal can't pass on all the
     # parameters as arguments
@@ -34,3 +36,9 @@ class ParameterSet:
 
     def get_max_pipe_dist(self):
         return self.max_dist
+
+    def get_iterations(self):
+        return self.iterations
+
+    def get_elec_type(self):
+        return self.electrolyzer_type
