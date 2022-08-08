@@ -33,7 +33,7 @@ class Computing:
     def run_single_model(self):
         # get parameters for the main model
         latitude = self.parameter_set.get_lat()
-        longitude = self.parameter_set.get_lat()
+        longitude = self.parameter_set.get_long()
 
         end_tuple = (latitude, longitude)  # [lat, long]
 
