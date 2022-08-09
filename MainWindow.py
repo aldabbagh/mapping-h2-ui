@@ -1,6 +1,7 @@
 import sys
 import ui_library
 import ParameterSet
+import mc_main
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import *
 
@@ -164,6 +165,7 @@ class UiWindow(QMainWindow):
         self.parameter_set = ParameterSet.ParameterSet()
 
         self.computing = ui_library.Computing(self.parameter_set)
+        self.mc_computing = mc_main.MonteCarloComputing(self.parameter_set)
 
         # on run button press set parameter values equal to the current contents of their respective widgets
         # and start the run (passing over the parameter values)
@@ -174,7 +176,9 @@ class UiWindow(QMainWindow):
         self.run_button.clicked.connect(self.set_allow_centralised)
         self.run_button.clicked.connect(self.set_allow_pipeline)
         self.run_button.clicked.connect(self.set_max_pipe_dist)
-        self.run_button.clicked.connect(self.computing.run_single_model)
+        self.run_button.clicked.connect(self.set_iterations)
+        self.run_button.clicked.connect(self.set_elec_type)
+        self.run_button.clicked.connect(self.single_or_mc)
 
     def on_mc_checkbox(self):
         if self.mc_checkbox.isChecked():
@@ -197,6 +201,12 @@ class UiWindow(QMainWindow):
             self.maxpipe_label.hide()
             self.maxpipe_spinbox.hide()
 
+    def single_or_mc(self):
+        if self.mc_checkbox.isChecked():
+            self.mc_computing.run_mc_model()
+        else:
+            self.computing.run_single_model()
+
     # setter functions for all parameters
     def set_long(self):
         longitude = float(self.long_lineedit.text())
@@ -209,7 +219,7 @@ class UiWindow(QMainWindow):
         self.parameter_set.latitude = latitude
 
     def set_demand(self):
-        demand = self.hhdemand_spinbox.value()
+        demand = int(self.hhdemand_spinbox.value())
         print("The yearly demand was set to:" + str(demand))
         self.parameter_set.demand = demand
 
@@ -220,12 +230,13 @@ class UiWindow(QMainWindow):
 
     def set_allow_centralised(self):
         centralised = self.conversion_checkbox.isChecked()
-        print("Centralised conversion is allowed :" + "true" if centralised else "false")
+        print("Centralised conversion is allowed: " + "true" if centralised else "Centralised conversion is allowed: "
+                                                                                 "false")
         self.parameter_set.centralised = centralised
 
     def set_allow_pipeline(self):
         pipeline = self.pipe_checkbox.isChecked()
-        print("Pipelines are allowed :" + str(pipeline))
+        print("Pipelines are allowed: " + str(pipeline))
         self.parameter_set.pipeline = pipeline
 
     def set_max_pipe_dist(self):
@@ -233,6 +244,15 @@ class UiWindow(QMainWindow):
         print("The maximum pipeline distance was set to:" + str(maxdist))
         self.parameter_set.max_dist = maxdist
 
+    def set_iterations(self):
+        iterations = int(self.iter_lineedit.text())
+        print("The number of iterations was set to: " + str(iterations))
+        self.parameter_set.iterations = iterations
+
+    def set_elec_type(self):
+        electrolyzer_type = self.electro_combo.currentText()
+        print("The electrolyzer type was set to: " + electrolyzer_type)
+        self.parameter_set.electrolyzer_type = electrolyzer_type
 
 app = QApplication(sys.argv)
 ui = UiWindow()
