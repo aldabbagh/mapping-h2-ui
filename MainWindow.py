@@ -254,8 +254,9 @@ class UiWindow(QMainWindow):
         print("The electrolyzer type was set to: " + electrolyzer_type)
         self.parameter_set.electrolyzer_type = electrolyzer_type
 
-app = QApplication(sys.argv)
-ui = UiWindow()
-ui.show()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ui = UiWindow()
+    ui.show()
 
-sys.exit(app.exec())
+    sys.exit(app.exec())
