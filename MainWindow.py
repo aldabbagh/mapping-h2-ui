@@ -70,10 +70,21 @@ class UiWindow(QMainWindow):
         self.hhdemand_layout.addWidget(self.hhdemand_label)
         self.hhdemand_layout.addWidget(self.hhdemand_spinbox)
 
+        # create combobox with electrolyzer options
+        self.electro_label = QLabel("electrolyzer type :")
+        self.electro_combo = QComboBox()
+        self.electro_combo.addItems(["soe", "alkaline", "pem"])
+
+        # put label and combo box into a layout
+        self.electro_layout = QHBoxLayout()
+        self.electro_layout.addWidget(self.electro_label)
+        self.electro_layout.addWidget(self.electro_combo)
+
         # creates a checkbox to decide whether to allow central conversion facilities
         self.conversion_checkbox = QCheckBox("allow central conversion")
 
         self.demand_conversion_groupbox_layout.addLayout(self.hhdemand_layout)
+        self.demand_conversion_groupbox_layout.addLayout(self.electro_layout)
         self.demand_conversion_groupbox_layout.addWidget(self.conversion_checkbox)
 
         # create a groupbox for the pipeline related widgets
@@ -113,23 +124,13 @@ class UiWindow(QMainWindow):
         self.iter_label = QLabel("number of iterations")
         self.iter_lineedit = QLineEdit()
 
-        # create combobox with electrolyzer options
-        self.electro_label = QLabel("electrolyzer type :")
-        self.electro_combo = QComboBox()
-        self.electro_combo.addItems(["soe", "alkaline", "pem"])
-
         # put labels and corresponding widgets into sub-layouts
         self.iter_layout = QHBoxLayout()
         self.iter_layout.addWidget(self.iter_label)
         self.iter_layout.addWidget(self.iter_lineedit)
 
-        self.electro_layout = QHBoxLayout()
-        self.electro_layout.addWidget(self.electro_label)
-        self.electro_layout.addWidget(self.electro_combo)
-
         self.mc_widgets_groupbox_layout.addWidget(self.mc_checkbox)
         self.mc_widgets_groupbox_layout.addLayout(self.iter_layout)
-        self.mc_widgets_groupbox_layout.addLayout(self.electro_layout)
         self.mc_widgets_groupbox.setLayout(self.mc_widgets_groupbox_layout)
 
         # creates a button to start the model run
@@ -148,8 +149,6 @@ class UiWindow(QMainWindow):
         # hide optional widgets by default at the start of the program
         self.iter_label.hide()
         self.iter_lineedit.hide()
-        self.electro_label.hide()
-        self.electro_combo.hide()
         self.maxpipe_label.hide()
         self.maxpipe_spinbox.hide()
 
@@ -176,7 +175,6 @@ class UiWindow(QMainWindow):
         self.run_button.clicked.connect(self.set_allow_centralised)
         self.run_button.clicked.connect(self.set_allow_pipeline)
         self.run_button.clicked.connect(self.set_max_pipe_dist)
-        self.run_button.clicked.connect(self.set_iterations)
         self.run_button.clicked.connect(self.set_elec_type)
         self.run_button.clicked.connect(self.single_or_mc)
 
@@ -184,14 +182,10 @@ class UiWindow(QMainWindow):
         if self.mc_checkbox.isChecked():
             self.iter_label.show()
             self.iter_lineedit.show()
-            self.electro_label.show()
-            self.electro_combo.show()
 
         else:
             self.iter_label.hide()
             self.iter_lineedit.hide()
-            self.electro_label.hide()
-            self.electro_combo.hide()
 
     def on_pipeline_checkbox(self):
         if self.pipe_checkbox.isChecked():
@@ -203,6 +197,7 @@ class UiWindow(QMainWindow):
 
     def single_or_mc(self):
         if self.mc_checkbox.isChecked():
+            self.set_iterations()
             self.mc_computing.run_mc_model()
         else:
             self.computing.run_single_model()
@@ -253,6 +248,7 @@ class UiWindow(QMainWindow):
         electrolyzer_type = self.electro_combo.currentText()
         print("The electrolyzer type was set to: " + electrolyzer_type)
         self.parameter_set.electrolyzer_type = electrolyzer_type
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
