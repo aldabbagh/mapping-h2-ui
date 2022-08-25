@@ -19,7 +19,7 @@ def print_basic_results(df):
     print('Cheapest medium: ' + str(cheapest_medium))
     print('Cheaper electricity: ' + str(cheapest_elec))
 
-    return min_cost, mindex
+    return min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec
 
 
 def get_path(df, end_plant_tuple, centralised, pipeline):
