@@ -55,8 +55,8 @@ class Computing:
         stop = timeit.default_timer()
         print('Total Time: ', stop - start)
 
-        print_basic_results(df)
+        min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec = print_basic_results(df)
 
-        get_path(df, end_tuple, centralised, pipeline)
+        final_path = get_path(df, end_tuple, centralised, pipeline)
 
-        #return df
+        return min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path
