@@ -4,6 +4,7 @@ import ParameterSet
 import mc_main
 from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import *
+import math
 
 
 class UiWindow(QMainWindow):
@@ -62,7 +63,7 @@ class UiWindow(QMainWindow):
 
         # creates the yearly hydrogen demand label and a spinbox that takes values between 1 and 1 million
         # the value can be changed in steps of 10 via the arrows; arrange it in a HBox layout with the label
-        self.hhdemand_label = QLabel("yearly hydrogen demand :")
+        self.hhdemand_label = QLabel("yearly hydrogen demand (in kilotons) :")
         self.hhdemand_spinbox = QDoubleSpinBox()
         self.hhdemand_spinbox.setRange(0, 1000000)
         self.hhdemand_spinbox.setSingleStep(10)
@@ -109,7 +110,7 @@ class UiWindow(QMainWindow):
         self.pipe_groupbox_layout.addLayout(self.maxpipe_layout)
         self.pipe_groupbox.setLayout(self.pipe_groupbox_layout)
 
-        # checkable groupbox to contain the monte carlo widgets
+        # groupbox to contain the monte carlo widgets
         self.mc_widgets_groupbox = QGroupBox("monte-carlo-simulation")
         self.mc_widgets_groupbox.setStyleSheet("QGroupBox { border-style: solid; border-width: 0.5px; "
                                                "border-radius: 5px; padding-top: 10px } ")
@@ -121,8 +122,9 @@ class UiWindow(QMainWindow):
 
         # creates optional parameter inputs for monte carlo sim
         # create label and lineedit to put in iterations
-        self.iter_label = QLabel("number of iterations")
+        self.iter_label = QLabel("iterations: ")
         self.iter_lineedit = QLineEdit()
+        self.iter_lineedit.setPlaceholderText("Enter the number of iterations")
 
         # put labels and corresponding widgets into sub-layouts
         self.iter_layout = QHBoxLayout()
@@ -133,6 +135,11 @@ class UiWindow(QMainWindow):
         self.mc_widgets_groupbox_layout.addLayout(self.iter_layout)
         self.mc_widgets_groupbox.setLayout(self.mc_widgets_groupbox_layout)
 
+        # create a label to display some results
+        self.results_textbox = QTextEdit()
+        self.results_textbox.setReadOnly(True)
+        self.results_textbox.setAcceptRichText(True)
+
         # creates a button to start the model run
         self.run_button = QPushButton("run model")
 
@@ -140,6 +147,7 @@ class UiWindow(QMainWindow):
         self.grid.addWidget(self.coord_groupbox, 0, 0)
         self.grid.addWidget(self.mc_widgets_groupbox, 0, 1)
         self.grid.addWidget(self.demand_conversion_groupbox, 1, 0)
+        self.grid.addWidget(self.results_textbox, 1, 1)
         self.grid.addWidget(self.pipe_groupbox, 2, 0)
         self.grid.addWidget(self.year_groupbox, 3, 0)
         self.grid.addWidget(self.run_button, 4, 1)
@@ -152,6 +160,7 @@ class UiWindow(QMainWindow):
         self.maxpipe_label.hide()
         self.maxpipe_spinbox.hide()
 
+        # because the class is a QMainWindow object we set the UI as the central widget
         self.setCentralWidget(self.window)
 
         # connecting the toggling of the monte carlo checkbox to slot, extending the parameter inputs
@@ -200,7 +209,14 @@ class UiWindow(QMainWindow):
             self.set_iterations()
             self.mc_computing.run_mc_model()
         else:
-            self.computing.run_single_model()
+            min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path = self.computing.run_single_model()
+            rounded_cost = self.round_half_up(min_cost, 2)
+            self.results_textbox.setText(str(rounded_cost) + "€/kg")
+            self.results_textbox.append("Index: " + str(mindex))
+            self.results_textbox.append("Cheapest source location: " + str(cheapest_source))
+            self.results_textbox.append("Cheapest transport medium: " + str(cheapest_medium))
+            self.results_textbox.append("Cheaper electricity: " + str(cheapest_elec))
+            self.results_textbox.append("Transport method: " + str(final_path))
 
     # setter functions for all parameters
     def set_long(self):
@@ -249,6 +265,10 @@ class UiWindow(QMainWindow):
         print("The electrolyzer type was set to: " + electrolyzer_type)
         self.parameter_set.electrolyzer_type = electrolyzer_type
 
+    @staticmethod
+    def round_half_up(n, decimals=0):
+        multiplier = 10 ** decimals
+        return math.floor(n * multiplier + 0.5) / multiplier
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
