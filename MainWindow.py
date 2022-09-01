@@ -47,7 +47,7 @@ class UiWindow(QMainWindow):
         # creates the year groupbox and a combo box with the options of choosing 2020, 2030, 2040, 2050
         self.year_groupbox = QGroupBox("year")
         self.year_groupbox.setStyleSheet("QGroupBox { border-style: solid; border-width: 0.5px; "
-                                         "border-radius: 5px; padding-top: 10px; padding-bottom: 3px }" )
+                                         "border-radius: 5px; padding-top: 10px; padding-bottom: 3px }")
         self.year_groupbox_layout = QVBoxLayout()
         self.year_combo = QComboBox()
         self.year_combo.addItems(["2020", "2030", "2040", "2050"])
@@ -139,6 +139,7 @@ class UiWindow(QMainWindow):
         self.results_textbox = QTextEdit()
         self.results_textbox.setReadOnly(True)
         self.results_textbox.setAcceptRichText(True)
+        self.results_textbox.setStyleSheet("QTextEdit { border-style: solid; border-width: 0.5px} ")
 
         # creates a button to start the model run
         self.run_button = QPushButton("run model")
@@ -207,7 +208,14 @@ class UiWindow(QMainWindow):
     def single_or_mc(self):
         if self.mc_checkbox.isChecked():
             self.set_iterations()
-            self.mc_computing.run_mc_model()
+            total_cost, generation_cost, solar_cost, wind_cost = self.mc_computing.run_mc_model()
+
+            self.results_textbox.setText("lowest total cost (mean of iterations): " + str(total_cost) + "€/kg")
+            self.results_textbox.append("lowest generation cost (mean of iterations): " + str(generation_cost) + "€/kg")
+            self.results_textbox.append("lowest solar cost (mean of iterations): " + str(solar_cost) + "€/MWh")
+            self.results_textbox.append("lowest wind cost (mean of iterations): " + str(wind_cost) + "€/MWh")
+            self.results_textbox.append("complete results of the monte-carlo-simulation \nhave been stored in the "
+                                        "Results/mc folder")
         else:
             min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path = self.computing.run_single_model()
             rounded_cost = self.round_half_up(min_cost, 2)
@@ -217,6 +225,7 @@ class UiWindow(QMainWindow):
             self.results_textbox.append("Cheapest transport medium: " + str(cheapest_medium))
             self.results_textbox.append("Cheaper electricity: " + str(cheapest_elec))
             self.results_textbox.append("Transport method: " + str(final_path))
+            self.results_textbox.append("the complete results have been saved to the Results folder")
 
     # setter functions for all parameters
     def set_long(self):
@@ -269,6 +278,7 @@ class UiWindow(QMainWindow):
     def round_half_up(n, decimals=0):
         multiplier = 10 ** decimals
         return math.floor(n * multiplier + 0.5) / multiplier
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
