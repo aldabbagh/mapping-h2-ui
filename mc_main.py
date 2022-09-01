@@ -1,6 +1,9 @@
+from pandas import DataFrame
+
 from mc_geo_path import *
 from mc_generation_costs import *
 from mc_parameter_def import *
+import numpy
 import timeit
 import os
 
@@ -51,6 +54,19 @@ class MonteCarloComputing:
         # stop timer
         stop = timeit.default_timer()
         print('Total Time: ', stop - start)
+
+        # calculation of mean values rounded to the 2nd decimal to return something to GUI
+        mean_total = numpy.mean(total_cost_per_kg_h2, axis=0)
+        min_mean_total = numpy.round_(numpy.nanmin(mean_total, axis=0), decimals=2)
+        mean_generation = numpy.mean(generation_cost_per_kg_h2, axis=0)
+        min_mean_generation = numpy.round_(numpy.nanmin(mean_generation, axis=0), decimals=2)
+        mean_solar = numpy.mean(solar_cost, axis=0)
+        min_mean_solar = numpy.round_(numpy.nanmin(mean_solar, axis=0), decimals=2)
+        mean_wind = numpy.mean(wind_cost, axis=0)
+        min_mean_wind = numpy.round_(numpy.nanmin(mean_wind, axis=0), decimals=2)
+
+        return min_mean_total, min_mean_generation, min_mean_solar, min_mean_wind
+
 
     def mc_main(self, end_plant_tuple, h2_demand, year=2021, centralised=True, pipeline=True, max_pipeline_dist=2000,
                 iterations=1000, elec_type='alkaline'):
