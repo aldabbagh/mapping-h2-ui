@@ -26,7 +26,7 @@ class Computing:
         df['Total Yearly Cost'] = df['Yearly gen. cost'] + df['Yearly Transport Cost']
         df['Total Cost per kg H2'] = df['Gen. cost per kg H2'] + df['Transport Cost per kg H2']
 
-        df.to_csv('Results/' + str(round(end_tuple[0])) + ',' + str(round(end_tuple[1])) + '.csv')
+        df.to_csv('Results/' + str(end_tuple[0]) + ',' + str(end_tuple[1]) + '.csv')
 
         return df
 
