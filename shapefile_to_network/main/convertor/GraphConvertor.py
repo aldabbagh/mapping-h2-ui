@@ -3,10 +3,10 @@ from shapely.ops import unary_union
 import fiona
 import networkx as nx
 import geopy.distance
-import itertools
+# import itertools
 from haversine import haversine
-from GraphSimplify import GraphSimplify
-from MultiDiGraphConvertor import MultiDiToSimple
+# from GraphSimplify import GraphSimplify
+# from MultiDiGraphConvertor import MultiDiToSimple
 
 
 class GraphConvertor:
@@ -85,9 +85,9 @@ class GraphConvertor:
     def graph_convertor(self):
         G = self.shape_convertor()
         nodes = G.nodes()
-        #print("Number of Nodes in the graph, ", len(nodes))
+        # print("Number of Nodes in the graph, ", len(nodes))
 
-        #Add new edges over pacific
+        # Add new edges over pacific
         for node in nodes:
             if node[1] > 170:
                 for node2 in nodes:
@@ -96,15 +96,15 @@ class GraphConvertor:
                             distance = geopy.distance.distance(node, node2)
                             G.add_edge(node, node2, weight=distance.km)
 
-        #simplify_graph = GraphSimplify(G)
-        #new_G = simplify_graph.simplify_graph()
+        # simplify_graph = GraphSimplify(G)
+        # new_G = simplify_graph.simplify_graph()
 
-        #print("Number of Nodes after simplifying, ", len(new_G.nodes))
-        #self.create_vertex_file(new_G)
-        #self.create_edges_file(new_G)
+        # print("Number of Nodes after simplifying, ", len(new_G.nodes))
+        # self.create_vertex_file(new_G)
+        # self.create_edges_file(new_G)
 
-        #multiDi_to_simple = MultiDiToSimple(new_G)
-        #new_simple_graph = multiDi_to_simple.convert_MultiDi_to_Simple()
-        #self.create_edges_vertex_shape(new_simple_graph)
+        # multiDi_to_simple = MultiDiToSimple(new_G)
+        # new_simple_graph = multiDi_to_simple.convert_MultiDi_to_Simple()
+        # self.create_edges_vertex_shape(new_simple_graph)
 
         return G
