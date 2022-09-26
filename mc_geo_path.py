@@ -3,7 +3,7 @@ import sys
 import geopy.distance
 import requests
 from scipy import spatial
-from Transport_cost_functions import *
+from mc_transport_cost_functions import *
 
 sys.path.append("shapefile_to_network/main/convertor")
 sys.path.append("shapefile_to_network/main/shortest_paths")
