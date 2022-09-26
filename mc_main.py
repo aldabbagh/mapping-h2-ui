@@ -82,12 +82,18 @@ class MonteCarloComputing:
         solar_cost = np.zeros((iterations, len(df)))
         wind_cost = np.zeros((iterations, len(df)))
 
+        cost_end_nh3 = np.zeros(iterations)
+        cost_end_lohc = np.zeros(iterations)
+        cost_end_h2_liq = np.zeros(iterations)
+
         # Define parameters for generation costs
         year_diff, capex_extra, capex_h2, lifetime_hours, electrolyser_efficiency, elec_opex, other_capex_elec, water_cost, \
         capex_wind, opex_wind, capex_solar, opex_factor_solar = define_gen_parameters(year, iterations, elec_type)
 
-        df, cost_end_nh3, cost_end_lohc, cost_end_h2_liq = initial_geo_calcs(df, end_plant_tuple,
-                                                                             centralised=centralised, pipeline=pipeline,
+        for i in range(iterations):
+            df, cost_end_nh3[i], cost_end_lohc[i], cost_end_h2_liq[i] = initial_geo_calcs(df, end_plant_tuple,
+                                                                             centralised=centralised,
+                                                                             pipeline=pipeline,
                                                                              max_pipeline_dist=max_pipeline_dist)
 
         for i in range(iterations):
@@ -97,7 +103,7 @@ class MonteCarloComputing:
                                      capex_wind[i], opex_wind[i], capex_solar[i], opex_factor_solar[i],
                                      interest=0.08, full_load_hours=2000)
 
-            df = mc_transport_costs(df, end_plant_tuple, h2_demand, cost_end_nh3, cost_end_lohc, cost_end_h2_liq,
+            df = mc_transport_costs(df, end_plant_tuple, h2_demand, cost_end_nh3[i], cost_end_lohc[i], cost_end_h2_liq[i],
                                     centralised=centralised, pipeline=pipeline,
                                     max_pipeline_dist=max_pipeline_dist)
 
