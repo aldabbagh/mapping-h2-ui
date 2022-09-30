@@ -2,9 +2,11 @@ import sys
 import ui_library
 import ParameterSet
 import mc_main
-from PyQt6 import QtGui, QtCore, QtWidgets
 from PyQt6.QtWidgets import *
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
 import math
+import DisplayMap
 
 
 class UiWindow(QMainWindow):
@@ -141,6 +143,13 @@ class UiWindow(QMainWindow):
         self.results_textbox.setAcceptRichText(True)
         self.results_textbox.setStyleSheet("QTextEdit { border-style: solid; border-width: 0.5px} ")
 
+        # dock-widget that opens up the file dialogue and later will display the map
+        self.display_map = QDockWidget("Load up a map")
+        self.file_dialogue = DisplayMap.fileselection()
+        self.file_dialogue_layout = QHBoxLayout()
+        self.file_dialogue.setLayout(self.file_dialogue_layout)
+        self.display_map.setWidget(self.file_dialogue)
+
         # creates a button to start the model run
         self.run_button = QPushButton("run model")
 
@@ -163,6 +172,8 @@ class UiWindow(QMainWindow):
 
         # because the class is a QMainWindow object we set the UI as the central widget
         self.setCentralWidget(self.window)
+        # set up the dock-widget to accommodate the map in the future
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.display_map)
 
         # connecting the toggling of the monte carlo checkbox to slot, extending the parameter inputs
         self.mc_checkbox.stateChanged.connect(self.on_mc_checkbox)
@@ -208,14 +219,15 @@ class UiWindow(QMainWindow):
     def single_or_mc(self):
         if self.mc_checkbox.isChecked():
             self.set_iterations()
-            total_cost, generation_cost, solar_cost, wind_cost = self.mc_computing.run_mc_model()
-
-            self.results_textbox.setText("lowest total cost (mean of iterations): " + str(total_cost) + "€/kg")
-            self.results_textbox.append("lowest generation cost (mean of iterations): " + str(generation_cost) + "€/kg")
-            self.results_textbox.append("lowest solar cost (mean of iterations): " + str(solar_cost) + "€/MWh")
-            self.results_textbox.append("lowest wind cost (mean of iterations): " + str(wind_cost) + "€/MWh")
+            # total_cost, generation_cost, solar_cost, wind_cost = self.mc_computing.run_mc_model()
+            cheapest_location_df = self.mc_computing.run_mc_model()
+            self.results_textbox.setText("Latitude: " + str(cheapest_location_df.iloc[0]['Latitude']))
+            self.results_textbox.append("Longitude: " + str(cheapest_location_df.iloc[0]['Longitude']))
+            self.results_textbox.append("Electricity production: " + str(cheapest_location_df.iloc[0]['Cheaper source']))
+            self.results_textbox.append("total cost per kg H2: " + str(
+                self.round_half_up(cheapest_location_df.iloc[0]['Total Cost per kg H2'], decimals=3)) + "€")
             self.results_textbox.append("complete results of the monte-carlo-simulation \nhave been stored in the "
-                                        "Results/mc folder")
+                                         "Results/mc folder")
         else:
             min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path = self.computing.run_single_model()
             rounded_cost = self.round_half_up(min_cost, 2)
