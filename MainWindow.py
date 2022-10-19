@@ -225,7 +225,7 @@ class UiWindow(QMainWindow):
             self.results_textbox.append("Longitude: " + str(cheapest_location_df.iloc[0]['Longitude']))
             self.results_textbox.append("Electricity production: " + str(cheapest_location_df.iloc[0]['Cheaper source']))
             self.results_textbox.append("total cost per kg H2: " + str(
-                self.round_half_up(cheapest_location_df.iloc[0]['Total Cost per kg H2'], decimals=3)) + "€")
+                self.round_half_up(cheapest_location_df.iloc[0]['Total Cost per kg H2'], decimals=2)) + "€")
             self.results_textbox.append("complete results of the monte-carlo-simulation \nhave been stored in the "
                                          "Results/mc folder")
         else:
