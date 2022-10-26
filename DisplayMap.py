@@ -1,19 +1,13 @@
 import io
-import sys
 import os
-import pandas as pd
-from scipy import spatial
-import timeit
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 import shapefile as shp  # Requires the pyshp package
 import openrouteservice
 from openrouteservice import convert
 import folium
-from folium.features import DivIcon
 from PyQt6.QtWebEngineWidgets import *
 from PyQt6.QtWidgets import *
+from print_results import *
 
 sys.path.append("/shapefile_to_network/main/convertor")
 sys.path.append("/shapefile_to_network/main/shortest_paths")
@@ -61,6 +55,7 @@ class fileselection(QWidget):
         mindex = mindex[0]
         self.cheapest_source = (self.df['Latitude'][mindex], self.df['Longitude'][mindex])
         self.end_tuple = (self.df['End Plant Latitude'][mindex], self.df['End Plant Longitude'][mindex])
+        transport_mode = self.df['Transport Mode'][mindex]
 
         # Create GraphConvertor object by passing the path of input shapefile and the output directory
         input_file = 'Data/shipping/shipping_routes/shipping_routes.shp'
@@ -88,98 +83,319 @@ class fileselection(QWidget):
         start_plant_tuple = start_plant_tuple[::-1]
         end_plant_tuple = end_plant_tuple[::-1]
 
-        # Find the closest port to the start point
-        distance, index = spatial.KDTree(port_coords).query(start_plant_tuple)  # Needs [long, lat]
-        start_port_code = df_ports.at[index, 'Unnamed: 0']
-        print('Start Port Code: ' + str(start_port_code))
-        start_port_tuple = port_coords[index][::-1]  # Outputs [long, lat]
-        print('Start Port Tuple: ' + str(start_port_tuple))
-
-        # Find the closest port to the end point
-        distance, index = spatial.KDTree(port_coords).query(end_plant_tuple)  # Needs [long, lat]
-        end_port_code = df_ports.at[index, 'Unnamed: 0']
-        print('End Port Code: ' + str(end_port_code))
-        end_port_tuple = port_coords[index][::-1]  # Outputs [long, lat]
-        print('End Port Tuple: ' + str(end_port_tuple))
-
-        # Create ShortestPath object by passing all required parameters listed below
-        g = network
-        alpha = 0.1
-        graph_buffer = 300
-        point_buffer = 1
-        break_point = 1  # Upper limit to save computation time
-
-        # start timer
-        start = timeit.default_timer()
-
-        shortest_path_obj = ShortestPath(g, alpha, graph_buffer, point_buffer, break_point)
-
-        # Run alpha_times_shortestpath function to calculate number of paths which are alpha times the shortest path
-        start_tuple_port = start_port_tuple
-        end_tuple_port = end_port_tuple
-
-        shortest_paths, buffered_graph = shortest_path_obj.find_shortest_paths(start_tuple_port, end_tuple_port)
-
-        shortest_dis = min(shortest_paths.keys())
-        print('shortest distance: ' + str(shortest_dis))
-        shortest_path = shortest_paths[shortest_dis]
-        new_start_coord = shortest_path[0]
-        print('new start coord: ' + str(new_start_coord))
-        new_end_coord = shortest_path[len(shortest_path) - 1]
-        print('new end coord: ' + str(new_end_coord))
-
-        # stop timer
-        stop = timeit.default_timer()
-
-        print('Computation Time for shortest path: ', stop - start)
-
-        # create dataframe to plot shortest path
-        df = pd.DataFrame(shortest_path)
-        utm_crs = {'init': 'epsg:4326'}
-        # geometry = Point(xy) for xy in zip(df[0], df[1])
-        # geo_df = gpd.GeoDataFrame(df, crs=utm_crs, geometry = geometry)
-        # geo_df.plot(markersize=20, color='red',marker='o',label = 'Path')
-        # fig = px.line_mapbox(lat=df[0], lon=df[1],
-        #                     mapbox_style="open-street-map", zoom=1)
-
-        # fig.show()
-
-        lat = df[0]
-        lon = df[1]
-        coords_ship = []
-        for i in range(len(lon)):
-            coords_ship.append([lat[i], lon[i]])
-
-        client = openrouteservice.Client(key='5b3ce3597851110001cf62487a8aff99152f40b9abb404dbb3a74056')
-
         coords = (start_plant_tuple, end_plant_tuple)
-        # res = client.directions(coords, radiuses=[5000, 5000])
-        # geometry = client.directions(coords, radiuses=[5000, 5000])['routes'][0]['geometry']
-        # decoded = convert.decode_polyline(geometry)
 
-        # distance_txt = "<h4> <b>Distance :&nbsp" + "<strong>" + str(
-        #     round(res['routes'][0]['summary']['distance'] / 1000, 1)) + " Km </strong>" + "</h4></b>"
-        # duration_txt = "<h4> <b>Duration :&nbsp" + "<strong>" + str(
-        #     round(res['routes'][0]['summary']['duration'] / 60, 1)) + " Mins. </strong>" + "</h4></b>"
+        if "Ship" not in transport_mode:
+            # no transport by ship -> either by truck or by pipeline
 
-        m = folium.Map(location=start_plant_tuple, zoom_start=2, control_scale=True,
-                       tiles="cartodbpositron", zoom_control=False)
+            if "Truck" in transport_mode:
+                client = openrouteservice.Client(key='5b3ce3597851110001cf62487a8aff99152f40b9abb404dbb3a74056')
 
-        folium.Marker(
-            location=list(coords[0][::-1]),
-            popup="Start point",
-            icon=folium.Icon(icon='map-marker', color="red"),
-        ).add_to(m)
+                res = client.directions(coords, radiuses=[5000, 5000])
+                geometry = client.directions(coords, radiuses=[5000, 5000])['routes'][0]['geometry']
+                decoded = convert.decode_polyline(geometry)
 
-        folium.Marker(
-            location=list(coords[1][::-1]),
-            popup="End point",
-            icon=folium.Icon(icon='map-marker', color="black"),
-        ).add_to(m)
+                distance_txt = "<h4> <b>Distance :&nbsp" + "<strong>" + str(
+                     round(res['routes'][0]['summary']['distance'] / 1000, 1)) + " Km </strong>" + "</h4></b>"
+                duration_txt = "<h4> <b>Duration :&nbsp" + "<strong>" + str(
+                     round(res['routes'][0]['summary']['duration'] / 60, 1)) + " Mins. </strong>" + "</h4></b>"
 
-        # m = self.add_categorical_legend(m, 'Transport Options',
-        #                                 colors=['seagreen', 'dodgerblue', 'purple'],
-        #                                 labels=['Ship', 'Truck', 'Pipeline'])
+                m = folium.Map(location=start_plant_tuple[::-1], zoom_start=2, control_scale=True,
+                               tiles="cartodbpositron", zoom_control=False)
+                folium.GeoJson(data=decoded).add_to(m)
+
+                folium.Marker(
+                    location=list(coords[0][::-1]),
+                    popup="Start point",
+                    icon=folium.Icon(icon='map-marker', color="red"),
+                ).add_to(m)
+
+                folium.Marker(
+                    location=list(coords[1][::-1]),
+                    popup="End point",
+                    icon=folium.Icon(icon='map-marker', color="black"),
+                ).add_to(m)
+            else:
+                m = folium.Map(location=start_plant_tuple[::-1], zoom_start=2, control_scale=True,
+                               tiles="cartodbpositron", zoom_control=False)
+                folium.Marker(
+                    location=list(coords[0][::-1]),
+                    popup="Start pipe",
+                    icon=folium.Icon(icon='map-marker', color="lightgreen"),
+                ).add_to(m)
+
+                folium.Marker(
+                    location=list(coords[1][::-1]),
+                    popup="End pipe",
+                    icon=folium.Icon(icon='map-marker', color="cadetblue"),
+                ).add_to(m)
+
+                pipe_full = [[start_plant_tuple[1], start_plant_tuple[0]],
+                             [end_plant_tuple[1], end_plant_tuple[0]]]
+                my_PolyLine = folium.PolyLine(locations=pipe_full, weight=3, color='purple')
+                m.add_child(my_PolyLine)
+
+        elif "Truck Ship" in transport_mode:
+            # Find the closest port to the start point
+            distance, index = spatial.KDTree(port_coords).query(start_plant_tuple)  # Needs [long, lat]
+            start_port_code = df_ports.at[index, 'Unnamed: 0']
+            print('Start Port Code: ' + str(start_port_code))
+            start_port_tuple = port_coords[index][::-1]  # Outputs [long, lat]
+            print('Start Port Tuple: ' + str(start_port_tuple))
+
+            # Find the closest port to the end point
+            distance, index = spatial.KDTree(port_coords).query(end_plant_tuple)  # Needs [long, lat]
+            end_port_code = df_ports.at[index, 'Unnamed: 0']
+            print('End Port Code: ' + str(end_port_code))
+            end_port_tuple = port_coords[index][::-1]  # Outputs [long, lat]
+            print('End Port Tuple: ' + str(end_port_tuple))
+
+            # display route from production location to start port
+            start_plant_to_port = (start_plant_tuple, start_port_tuple[::-1])
+            client = openrouteservice.Client(key='5b3ce3597851110001cf62487a8aff99152f40b9abb404dbb3a74056')
+
+            res = client.directions(start_plant_to_port, radiuses=[5000, 5000])
+            geometry = client.directions(start_plant_to_port, radiuses=[5000, 5000])['routes'][0]['geometry']
+            decoded = convert.decode_polyline(geometry)
+
+            distance_txt = "<h4> <b>Distance :&nbsp" + "<strong>" + str(
+                round(res['routes'][0]['summary']['distance'] / 1000, 1)) + " Km </strong>" + "</h4></b>"
+            duration_txt = "<h4> <b>Duration :&nbsp" + "<strong>" + str(
+                round(res['routes'][0]['summary']['duration'] / 60, 1)) + " Mins. </strong>" + "</h4></b>"
+
+            m = folium.Map(location=start_plant_tuple[::-1], zoom_start=2, control_scale=True,
+                           tiles="cartodbpositron", zoom_control=False)
+            folium.GeoJson(data=decoded).add_to(m)
+
+            folium.Marker(
+                location=list(start_plant_to_port[0][::-1]),
+                popup="Start point",
+                icon=folium.Icon(icon='map-marker', color="red"),
+            ).add_to(m)
+
+            folium.Marker(
+                location=list(start_plant_to_port[1][::-1]),
+                popup="End point",
+                icon=folium.Icon(icon='map-marker', color="black"),
+            ).add_to(m)
+
+            # Create ShortestPath object by passing all required parameters listed below
+            g = network
+            alpha = 0.1
+            graph_buffer = 300
+            point_buffer = 1
+            break_point = 1  # Upper limit to save computation time
+
+            # start timer
+            start = timeit.default_timer()
+
+            shortest_path_obj = ShortestPath(g, alpha, graph_buffer, point_buffer, break_point)
+
+            # Run alpha_times_shortestpath function to calculate number of paths which are alpha times the shortest path
+            start_tuple_port = start_port_tuple
+            end_tuple_port = end_port_tuple
+
+            shortest_paths, buffered_graph = shortest_path_obj.find_shortest_paths(start_tuple_port, end_tuple_port)
+
+            shortest_dis = min(shortest_paths.keys())
+            print('shortest distance: ' + str(shortest_dis))
+            shortest_path = shortest_paths[shortest_dis]
+            new_start_coord = shortest_path[0]
+            print('new start coord: ' + str(new_start_coord))
+            new_end_coord = shortest_path[len(shortest_path) - 1]
+            print('new end coord: ' + str(new_end_coord))
+
+            # stop timer
+            stop = timeit.default_timer()
+
+            print('Computation Time for shortest path: ', stop - start)
+
+            # create dataframe to plot shortest path
+            df = pd.DataFrame(shortest_path)
+            lat = df[0]
+            lon = df[1]
+
+            # store all relevant coordinates for the shipping route inside coords_ship
+            coords_ship = [start_tuple_port]
+            for i in range(len(lon)):
+                coords_ship.append([lat[i], lon[i]])
+            coords_ship.append(end_tuple_port)
+
+            # plot shipping route as a line on the map
+            ship_route = [coords_ship]
+            ship_PolyLine = folium.PolyLine(locations=ship_route, weight=3, color='seagreen')
+            m.add_child(ship_PolyLine)
+
+            if 'Pipe' in transport_mode:
+                folium.Marker(
+                    location=end_tuple_port[::-1],
+                    popup="Start pipe",
+                    icon=folium.Icon(icon='map-marker', color="lightgreen"),
+                ).add_to(m)
+
+                folium.Marker(
+                    location=end_plant_tuple[::-1],
+                    popup="End pipe",
+                    icon=folium.Icon(icon='map-marker', color="cadetblue"),
+                ).add_to(m)
+
+                pipe_full = [end_tuple_port, end_plant_tuple]
+                pipe_PolyLine = folium.PolyLine(locations=pipe_full, weight=3, color='purple')
+                m.add_child(pipe_PolyLine)
+            else:
+                client = openrouteservice.Client(key='5b3ce3597851110001cf62487a8aff99152f40b9abb404dbb3a74056')
+                end_port_to_end_plant = [end_tuple_port[::-1], end_plant_tuple]
+
+                res = client.directions(end_port_to_end_plant, radiuses=[5000, 5000])
+                geometry2 = client.directions(end_port_to_end_plant, radiuses=[5000, 5000])['routes'][0]['geometry']
+                decoded2 = convert.decode_polyline(geometry2)
+
+                distance_txt = "<h4> <b>Distance :&nbsp" + "<strong>" + str(
+                    round(res['routes'][0]['summary']['distance'] / 1000, 1)) + " Km </strong>" + "</h4></b>"
+                duration_txt = "<h4> <b>Duration :&nbsp" + "<strong>" + str(
+                    round(res['routes'][0]['summary']['duration'] / 60, 1)) + " Mins. </strong>" + "</h4></b>"
+
+                folium.GeoJson(data=decoded2).add_to(m)
+
+                folium.Marker(
+                    location=list(end_port_to_end_plant[0][::-1]),
+                    popup="Start point",
+                    icon=folium.Icon(icon='map-marker', color="red"),
+                ).add_to(m)
+
+                folium.Marker(
+                    location=list(end_port_to_end_plant[1][::-1]),
+                    popup="End point",
+                    icon=folium.Icon(icon='map-marker', color="black"),
+                ).add_to(m)
+
+        elif 'Pipe Ship' in transport_mode:
+            # Find the closest port to the start point
+            distance, index = spatial.KDTree(port_coords).query(start_plant_tuple)  # Needs [long, lat]
+            start_port_code = df_ports.at[index, 'Unnamed: 0']
+            print('Start Port Code: ' + str(start_port_code))
+            start_port_tuple = port_coords[index][::-1]  # Outputs [long, lat]
+            print('Start Port Tuple: ' + str(start_port_tuple))
+
+            # Find the closest port to the end point
+            distance, index = spatial.KDTree(port_coords).query(end_plant_tuple)  # Needs [long, lat]
+            end_port_code = df_ports.at[index, 'Unnamed: 0']
+            print('End Port Code: ' + str(end_port_code))
+            end_port_tuple = port_coords[index][::-1]  # Outputs [long, lat]
+            print('End Port Tuple: ' + str(end_port_tuple))
+
+            # display route from production location to start port
+            start_plant_to_port = (start_plant_tuple, start_port_tuple[::-1])
+
+            m = folium.Map(location=start_plant_tuple[::-1], zoom_start=2, control_scale=True,
+                           tiles="cartodbpositron", zoom_control=False)
+
+            folium.Marker(
+                location=list(start_plant_to_port[0][::-1]),
+                popup="Start point",
+                icon=folium.Icon(icon='map-marker', color="red"),
+            ).add_to(m)
+
+            folium.Marker(
+                location=list(start_plant_to_port[1][::-1]),
+                popup="End point",
+                icon=folium.Icon(icon='map-marker', color="black"),
+            ).add_to(m)
+
+            pipe_to_port = [start_plant_tuple[::-1], start_port_tuple]
+            pipe_PolyLine = folium.PolyLine(locations=pipe_to_port, weight=3, color='purple')
+            m.add_child(pipe_PolyLine)
+
+            # Create ShortestPath object by passing all required parameters listed below
+            g = network
+            alpha = 0.1
+            graph_buffer = 300
+            point_buffer = 1
+            break_point = 1  # Upper limit to save computation time
+
+            # start timer
+            start = timeit.default_timer()
+
+            shortest_path_obj = ShortestPath(g, alpha, graph_buffer, point_buffer, break_point)
+
+            # Run alpha_times_shortestpath function to calculate number of paths which are alpha times the shortest path
+            start_tuple_port = start_port_tuple
+            end_tuple_port = end_port_tuple
+
+            shortest_paths, buffered_graph = shortest_path_obj.find_shortest_paths(start_tuple_port, end_tuple_port)
+
+            shortest_dis = min(shortest_paths.keys())
+            print('shortest distance: ' + str(shortest_dis))
+            shortest_path = shortest_paths[shortest_dis]
+            new_start_coord = shortest_path[0]
+            print('new start coord: ' + str(new_start_coord))
+            new_end_coord = shortest_path[len(shortest_path) - 1]
+            print('new end coord: ' + str(new_end_coord))
+
+            # stop timer
+            stop = timeit.default_timer()
+
+            print('Computation Time for shortest path: ', stop - start)
+
+            # create dataframe to plot shortest path
+            df = pd.DataFrame(shortest_path)
+            lat = df[0]
+            lon = df[1]
+
+            # store all relevant coordinates for the shipping route inside coords_ship
+            coords_ship = [start_tuple_port]
+            for i in range(len(lon)):
+                coords_ship.append([lat[i], lon[i]])
+            coords_ship.append(end_tuple_port)
+
+            # plot shipping route as a line on the map
+            ship_route = [coords_ship]
+            ship_PolyLine = folium.PolyLine(locations=ship_route, weight=3, color='seagreen')
+            m.add_child(ship_PolyLine)
+
+            if 'Truck' in transport_mode:
+                client = openrouteservice.Client(key='5b3ce3597851110001cf62487a8aff99152f40b9abb404dbb3a74056')
+                end_port_to_end_plant = [end_tuple_port[::-1], end_plant_tuple]
+
+                res = client.directions(end_port_to_end_plant, radiuses=[5000, 5000])
+                geometry2 = client.directions(end_port_to_end_plant, radiuses=[5000, 5000])['routes'][0]['geometry']
+                decoded2 = convert.decode_polyline(geometry2)
+
+                distance_txt = "<h4> <b>Distance :&nbsp" + "<strong>" + str(
+                    round(res['routes'][0]['summary']['distance'] / 1000, 1)) + " Km </strong>" + "</h4></b>"
+                duration_txt = "<h4> <b>Duration :&nbsp" + "<strong>" + str(
+                    round(res['routes'][0]['summary']['duration'] / 60, 1)) + " Mins. </strong>" + "</h4></b>"
+
+                folium.GeoJson(data=decoded2).add_to(m)
+
+                folium.Marker(
+                    location=list(end_port_to_end_plant[0][::-1]),
+                    popup="Start point",
+                    icon=folium.Icon(icon='map-marker', color="red"),
+                ).add_to(m)
+
+                folium.Marker(
+                    location=list(end_port_to_end_plant[1][::-1]),
+                    popup="End point",
+                    icon=folium.Icon(icon='map-marker', color="black"),
+                ).add_to(m)
+            else:
+                folium.Marker(
+                    location=end_tuple_port,
+                    popup="Start pipe",
+                    icon=folium.Icon(icon='map-marker', color="lightgreen"),
+                ).add_to(m)
+
+                folium.Marker(
+                    location=end_plant_tuple[::-1],
+                    popup="End pipe",
+                    icon=folium.Icon(icon='map-marker', color="cadetblue"),
+                ).add_to(m)
+
+                pipe_full = [end_tuple_port, end_plant_tuple[::-1]]
+                pipe_PolyLine = folium.PolyLine(locations=pipe_full, weight=3, color='purple')
+                m.add_child(pipe_PolyLine)
+
 
         data = io.BytesIO()
         m.save(data, close_file=False)
@@ -190,107 +406,6 @@ class fileselection(QWidget):
         w.resize(640, 480)
         w.show()
 
-    @staticmethod
-    def add_categorical_legend(folium_map, title, colors, labels):
-        if len(colors) != len(labels):
-            raise ValueError("colors and labels must have the same length.")
-
-        color_by_label = dict(zip(labels, colors))
-
-        legend_categories = ""
-        for label, color in color_by_label.items():
-            legend_categories += f"<li><span style='background:{color}'></span>{label}</li>"
-
-        legend_html = f"""
-        <div id='maplegend' class='maplegend'>
-          <div class='legend-title'>{title}</div>
-          <div class='legend-scale'>
-            <ul class='legend-labels'>
-            {legend_categories}
-            </ul>
-          </div>
-        </div>
-        """
-        script = f"""
-            <script type="text/javascript">
-            var oneTimeExecution = (function() {{
-                        var executed = false;
-                        return function() {{
-                            if (!executed) {{
-                                 var checkExist = setInterval(function() {{
-                                           if ((document.getElementsByClassName('leaflet-top leaflet-left').length) || (!executed)) {{
-                                              document.getElementsByClassName('leaflet-top leaflet-left')[0].style.display = "flex"
-                                              document.getElementsByClassName('leaflet-top leaflet-left')[0].style.flexDirection = "column"
-                                              document.getElementsByClassName('leaflet-top leaflet-left')[0].innerHTML += `{legend_html}`;
-                                              clearInterval(checkExist);
-                                              executed = true;
-                                           }}
-                                        }}, 100);
-                            }}
-                        }};
-                    }})();
-            oneTimeExecution()
-            </script>
-          """
-
-        css = """
-
-        <style type='text/css'>
-          .maplegend {
-            z-index:9999;
-            float:right;
-            background-color: rgba(255, 255, 255, 1);
-            border-radius: 5px;
-            border: 2px solid #bbb;
-            padding: 10px;
-            margin-top: 150px;
-            margin-left: 100px;
-            font-size:12px;
-            positon: relative;
-          }
-          .maplegend .legend-title {
-            text-align: left;
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 110%;
-            }
-          .maplegend .legend-scale ul {
-            margin: 0;
-            margin-bottom: 5px;
-            padding: 0;
-            float: left;
-            list-style: none;
-            }
-          .maplegend .legend-scale ul li {
-            font-size: 100%;
-            list-style: none;
-            margin-left: 0;
-            line-height: 18px;
-            margin-bottom: 2px;
-            }
-          .maplegend ul.legend-labels li span {
-            display: block;
-            float: left;
-            height: 16px;
-            width: 30px;
-            margin-right: 5px;
-            margin-left: 0;
-            border: 0px solid #ccc;
-            }
-          .maplegend .legend-source {
-            font-size: 100%;
-            color: #777;
-            clear: both;
-            }
-          .maplegend a {
-            color: #777;
-            }
-        </style>
-        """
-
-        folium_map.get_root().header.add_child(folium.Element(script + css))
-
-        return folium_map
 
     @staticmethod
     def create_port_coordinates(df_ports):
