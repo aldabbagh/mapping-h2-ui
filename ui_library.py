@@ -26,6 +26,14 @@ class Computing:
         df['Total Yearly Cost'] = df['Yearly gen. cost'] + df['Yearly Transport Cost']
         df['Total Cost per kg H2'] = df['Gen. cost per kg H2'] + df['Transport Cost per kg H2']
 
+        min_cost = min(df['Total Cost per kg H2'])
+        mindex = df.index.values[df['Total Cost per kg H2'] == min_cost]
+        mindex = mindex[0]
+
+        final_path = get_path(df, end_tuple, centralised, pipeline)
+        df['Transport Mode'] = ''
+        df['Transport Mode'][mindex] = final_path
+
         df.to_csv('Results/' + str(end_tuple[0]) + ',' + str(end_tuple[1]) + '.csv')
 
         return df
