@@ -141,17 +141,12 @@ class UiWindow(QMainWindow):
         self.results_textbox = QTextEdit()
         self.results_textbox.setReadOnly(True)
         self.results_textbox.setAcceptRichText(True)
-        self.results_textbox.setStyleSheet("QTextEdit { border-style: solid; border-width: 0.5px} ")
+        self.results_textbox.setStyleSheet("QTextEdit { border-style: solid; border-width: 0.5px; "
+                                           "border-radius: 5px; background-color: Azure  } ")
 
-        # dock-widget that opens up the file dialogue and later will display the map
-        self.display_map = QDockWidget("Load up a map")
-        self.file_dialogue = DisplayMap.fileselection()
-        self.file_dialogue_layout = QHBoxLayout()
-        self.file_dialogue.setLayout(self.file_dialogue_layout)
-        self.display_map.setWidget(self.file_dialogue)
-
-        # creates a button to start the model run
+        # creates a button to start the model run and to open the sidebar for mapping of results
         self.run_button = QPushButton("run model")
+        self.map_dialog_button = QPushButton("open map sidebar")
 
         # arranges all widgets in a grid
         self.grid.addWidget(self.coord_groupbox, 0, 0)
@@ -161,6 +156,7 @@ class UiWindow(QMainWindow):
         self.grid.addWidget(self.pipe_groupbox, 2, 0)
         self.grid.addWidget(self.year_groupbox, 3, 0)
         self.grid.addWidget(self.run_button, 4, 1)
+        self.grid.addWidget(self.map_dialog_button, 5,1)
 
         self.window.setLayout(self.grid)
 
@@ -172,8 +168,6 @@ class UiWindow(QMainWindow):
 
         # because the class is a QMainWindow object we set the UI as the central widget
         self.setCentralWidget(self.window)
-        # set up the dock-widget to accommodate the map in the future
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.display_map)
 
         # connecting the toggling of the monte carlo checkbox to slot, extending the parameter inputs
         self.mc_checkbox.stateChanged.connect(self.on_mc_checkbox)
@@ -198,6 +192,9 @@ class UiWindow(QMainWindow):
         self.run_button.clicked.connect(self.set_max_pipe_dist)
         self.run_button.clicked.connect(self.set_elec_type)
         self.run_button.clicked.connect(self.single_or_mc)
+
+        # when map dialog button is pressed add a docked widget that allows displaying a map
+        self.map_dialog_button.clicked.connect(self.load_new_mapwidget)
 
     def on_mc_checkbox(self):
         if self.mc_checkbox.isChecked():
@@ -285,6 +282,14 @@ class UiWindow(QMainWindow):
         electrolyzer_type = self.electro_combo.currentText()
         print("The electrolyzer type was set to: " + electrolyzer_type)
         self.parameter_set.electrolyzer_type = electrolyzer_type
+
+    def load_new_mapwidget(self):
+        self.display_map = QDockWidget("Load up a map")
+        self.file_dialogue = DisplayMap.fileselection()
+        self.file_dialogue_layout = QHBoxLayout()
+        self.file_dialogue.setLayout(self.file_dialogue_layout)
+        self.display_map.setWidget(self.file_dialogue)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.display_map)
 
     @staticmethod
     def round_half_up(n, decimals=0):
