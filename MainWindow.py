@@ -16,6 +16,8 @@ class UiWindow(QMainWindow):
         self.setGeometry(500, 200, 600, 400)
 
         self.window = QWidget()
+        self.window.setStyleSheet(" background-color: Linen ")
+        # self.window.setStyleSheet(" QMainWindow.separator { background-color: red; width: 30; height: 30px } " )
 
         self.grid = QGridLayout()
 
@@ -146,7 +148,16 @@ class UiWindow(QMainWindow):
 
         # creates a button to start the model run and to open the sidebar for mapping of results
         self.run_button = QPushButton("run model")
-        self.map_dialog_button = QPushButton("open map sidebar")
+        self.run_button.setStyleSheet("QPushButton { background-color: LightBlue  } ")
+        self.map_dialog_button = QPushButton("open 'DisplayMap' sidebar")
+        self.map_dialog_button.setStyleSheet("QPushButton { background-color: Khaki} ")
+        self.run_map_button_layout = QVBoxLayout()
+        self.run_map_button_layout.addWidget(self.run_button)
+        self.run_map_button_layout.addWidget(self.map_dialog_button)
+
+        # creates a button to close the program window
+        self.quit_button = QPushButton("Quit")
+        self.quit_button.setStyleSheet("QPushButton { background-color: IndianRed } ")
 
         # arranges all widgets in a grid
         self.grid.addWidget(self.coord_groupbox, 0, 0)
@@ -155,8 +166,8 @@ class UiWindow(QMainWindow):
         self.grid.addWidget(self.results_textbox, 1, 1)
         self.grid.addWidget(self.pipe_groupbox, 2, 0)
         self.grid.addWidget(self.year_groupbox, 3, 0)
-        self.grid.addWidget(self.run_button, 4, 1)
-        self.grid.addWidget(self.map_dialog_button, 5,1)
+        self.grid.addLayout(self.run_map_button_layout, 2, 1)
+        self.grid.addWidget(self.quit_button, 3, 1)
 
         self.window.setLayout(self.grid)
 
@@ -192,6 +203,7 @@ class UiWindow(QMainWindow):
         self.run_button.clicked.connect(self.set_max_pipe_dist)
         self.run_button.clicked.connect(self.set_elec_type)
         self.run_button.clicked.connect(self.single_or_mc)
+        self.quit_button.clicked.connect(QCoreApplication.instance().quit)
 
         # when map dialog button is pressed add a docked widget that allows displaying a map
         self.map_dialog_button.clicked.connect(self.load_new_mapwidget)
@@ -220,11 +232,12 @@ class UiWindow(QMainWindow):
             cheapest_location_df = self.mc_computing.run_mc_model()
             self.results_textbox.setText("Latitude: " + str(cheapest_location_df.iloc[0]['Latitude']))
             self.results_textbox.append("Longitude: " + str(cheapest_location_df.iloc[0]['Longitude']))
-            self.results_textbox.append("Electricity production: " + str(cheapest_location_df.iloc[0]['Cheaper source']))
+            self.results_textbox.append(
+                "Electricity production: " + str(cheapest_location_df.iloc[0]['Cheaper source']))
             self.results_textbox.append("total cost per kg H2: " + str(
                 self.round_half_up(cheapest_location_df.iloc[0]['Total Cost per kg H2'], decimals=2)) + "€")
             self.results_textbox.append("complete results of the monte-carlo-simulation \nhave been stored in the "
-                                         "Results/mc folder")
+                                        "Results/mc folder")
         else:
             min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path = self.computing.run_single_model()
             rounded_cost = self.round_half_up(min_cost, 2)
@@ -285,6 +298,11 @@ class UiWindow(QMainWindow):
 
     def load_new_mapwidget(self):
         self.display_map = QDockWidget("Load up a map")
+        self.display_map.setStyleSheet("QDockWidget { "
+                                       "width: auto; "
+                                       "background-color: HoneyDew }"
+                                       "QDockWidget.title { "
+                                       "padding-right: 3px} ")
         self.file_dialogue = DisplayMap.fileselection()
         self.file_dialogue_layout = QHBoxLayout()
         self.file_dialogue.setLayout(self.file_dialogue_layout)
