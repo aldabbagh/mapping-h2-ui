@@ -423,7 +423,7 @@ class fileselection(QWidget):
         w.show()
 
     def plot_world_results(self):
-        """Plots world map showing Total cost per kg H2."""
+        """Plots world map showing various cost metrics for producing H2."""
         data = self.df
         desired_metric = self.world_heatmap_result_metric_combo.currentText()
 
