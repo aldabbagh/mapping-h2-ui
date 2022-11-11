@@ -3,7 +3,7 @@ import ui_library
 import ParameterSet
 import mc_main
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import *
+from PyQt6.QtGui import QDoubleValidator, QValidator
 from PyQt6.QtCore import *
 import math
 import DisplayMap
@@ -208,6 +208,10 @@ class UiWindow(QMainWindow):
         # when map dialog button is pressed add a docked widget that allows displaying a map
         self.map_dialog_button.clicked.connect(self.load_new_mapwidget)
 
+        # validation of the lineedit inputs is triggered by the editing finished signal
+        self.lat_lineedit.editingFinished.connect(self.validate_latitude)
+        self.long_lineedit.editingFinished.connect(self.validate_longitude)
+
     def on_mc_checkbox(self):
         if self.mc_checkbox.isChecked():
             self.iter_label.show()
@@ -308,6 +312,61 @@ class UiWindow(QMainWindow):
         self.file_dialogue.setLayout(self.file_dialogue_layout)
         self.display_map.setWidget(self.file_dialogue)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.display_map)
+
+    def validate_latitude(self):
+
+        if len(self.lat_lineedit.text()) == 0:
+            self.lat_lineedit.setStyleSheet("background-color: Linen")
+        else:
+            validation_rule = QDoubleValidator(-90, 90, 100)
+            validation_rule.setNotation(QDoubleValidator.Notation.StandardNotation)
+            locale = QLocale("en")
+            validation_rule.setLocale(locale)
+
+            print(validation_rule.validate(self.lat_lineedit.text(), 1))
+
+            if validation_rule.validate(self.lat_lineedit.text(), 1)[0] == QDoubleValidator.State.Acceptable:
+                self.lat_lineedit.setStyleSheet("background-color: LightGreen")
+            else:
+                self.lat_lineedit.setStyleSheet("background-color: Crimson")
+                self.dialog = QMessageBox()
+                self.dialog.setWindowTitle("Please enter a valid latitudinal value")
+                self.dialog.setText("The latitudinal value can lie between -90° and 90°. "
+                                 "\nSeparate the decimal values via a '.' (dot)." )
+                button = self.dialog.exec()
+
+                if button == QMessageBox.StandardButton.Ok:
+                    print("Ok!")
+                    self.lat_lineedit.clear()
+                    self.lat_lineedit.setStyleSheet("background-color: Linen")
+
+    def validate_longitude(self):
+
+        if len(self.long_lineedit.text()) == 0:
+            self.long_lineedit.setStyleSheet("background-color: Linen")
+        else:
+            validation_rule = QDoubleValidator(-180, 180, 100)
+            validation_rule.setNotation(QDoubleValidator.Notation.StandardNotation)
+            locale = QLocale("en")
+            validation_rule.setLocale(locale)
+
+            print(validation_rule.validate(self.long_lineedit.text(), 2))
+
+            if validation_rule.validate(self.long_lineedit.text(), 2)[0] == QDoubleValidator.State.Acceptable:
+                self.long_lineedit.setStyleSheet("background-color: Lightgreen")
+            else:
+                self.long_lineedit.setStyleSheet("background-color: Crimson")
+                self.dialog = QMessageBox()
+                self.dialog.setWindowTitle("Please enter a valid longitudinal value")
+                self.dialog.setText("The longitudinal value can lie between -180° and 180°. "
+                                 "\nSeparate the decimal values via a '.' (dot)." )
+                button = self.dialog.exec()
+
+                if button == QMessageBox.StandardButton.Ok:
+                    print("Ok!")
+                    self.long_lineedit.clear()
+                    self.long_lineedit.setStyleSheet("background-color: Linen")
+
 
     @staticmethod
     def round_half_up(n, decimals=0):
