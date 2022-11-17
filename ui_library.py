@@ -1,6 +1,5 @@
 from generation_costs import *
 from print_results import *
-from plot_results import *
 import timeit
 
 
