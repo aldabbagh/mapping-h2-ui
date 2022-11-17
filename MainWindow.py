@@ -3,7 +3,7 @@ import ui_library
 import ParameterSet
 import mc_main
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QDoubleValidator, QValidator
+from PyQt6.QtGui import QDoubleValidator, QIntValidator
 from PyQt6.QtCore import *
 import math
 import DisplayMap
@@ -34,7 +34,9 @@ class UiWindow(QMainWindow):
         self.long_label = QLabel("longitude :")
         self.lat_label = QLabel("latitude :")
         self.long_lineedit = QLineEdit()
+        self.long_lineedit.setPlaceholderText("Enter longitudinal value")
         self.lat_lineedit = QLineEdit()
+        self.lat_lineedit.setPlaceholderText("Enter latitudinal value")
 
         # put longitude and latitude labels into horizontal layouts together with their lineedits
         self.long_hbox = QHBoxLayout()
@@ -211,17 +213,20 @@ class UiWindow(QMainWindow):
         # validation of the lineedit inputs is triggered by the editing finished signal
         self.lat_lineedit.editingFinished.connect(self.validate_latitude)
         self.long_lineedit.editingFinished.connect(self.validate_longitude)
+        self.iter_lineedit.editingFinished.connect(self.validate_iterations)
 
     def on_mc_checkbox(self):
+        """Shows or hides the Monte-Carlo specific parameter input fields dependent on whether the
+        mc-checkbox is checked."""
         if self.mc_checkbox.isChecked():
             self.iter_label.show()
             self.iter_lineedit.show()
-
         else:
             self.iter_label.hide()
             self.iter_lineedit.hide()
 
     def on_pipeline_checkbox(self):
+        """Shows or hides the maximum pipeline length selector dependent on whether pipelines are allowed."""
         if self.pipe_checkbox.isChecked():
             self.maxpipe_label.show()
             self.maxpipe_spinbox.show()
@@ -230,9 +235,10 @@ class UiWindow(QMainWindow):
             self.maxpipe_spinbox.hide()
 
     def single_or_mc(self):
+        """This method checks if either a single or a mc run is to be computed. Then runs the model and
+        gives some short written results in the textbox."""
         if self.mc_checkbox.isChecked():
             self.set_iterations()
-            # total_cost, generation_cost, solar_cost, wind_cost = self.mc_computing.run_mc_model()
             cheapest_location_df = self.mc_computing.run_mc_model()
             self.results_textbox.setText("Latitude: " + str(cheapest_location_df.iloc[0]['Latitude']))
             self.results_textbox.append("Longitude: " + str(cheapest_location_df.iloc[0]['Longitude']))
@@ -301,19 +307,22 @@ class UiWindow(QMainWindow):
         self.parameter_set.electrolyzer_type = electrolyzer_type
 
     def load_new_mapwidget(self):
+        """This Method creates a new docked 'Visualisation' Widget"""
+
         self.display_map = QDockWidget("Load up a map")
         self.display_map.setStyleSheet("QDockWidget { "
                                        "width: auto; "
                                        "background-color: HoneyDew }"
                                        "QDockWidget.title { "
                                        "padding-right: 3px} ")
-        self.file_dialogue = DisplayMap.fileselection()
+        self.file_dialogue = DisplayMap.Visualizing()
         self.file_dialogue_layout = QHBoxLayout()
         self.file_dialogue.setLayout(self.file_dialogue_layout)
         self.display_map.setWidget(self.file_dialogue)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.display_map)
 
     def validate_latitude(self):
+        """Validation method to check if the user input in the Latitude LineEdit is between bounds."""
 
         if len(self.lat_lineedit.text()) == 0:
             self.lat_lineedit.setStyleSheet("background-color: Linen")
@@ -332,7 +341,7 @@ class UiWindow(QMainWindow):
                 self.dialog = QMessageBox()
                 self.dialog.setWindowTitle("Please enter a valid latitudinal value")
                 self.dialog.setText("The latitudinal value can lie between -90° and 90°. "
-                                 "\nSeparate the decimal values via a '.' (dot)." )
+                                    "\nSeparate the decimal values via a '.' (dot)." )
                 button = self.dialog.exec()
 
                 if button == QMessageBox.StandardButton.Ok:
@@ -341,6 +350,7 @@ class UiWindow(QMainWindow):
                     self.lat_lineedit.setStyleSheet("background-color: Linen")
 
     def validate_longitude(self):
+        """Validation method to check if the user input in the Longitude LineEdit is between bounds."""
 
         if len(self.long_lineedit.text()) == 0:
             self.long_lineedit.setStyleSheet("background-color: Linen")
@@ -359,7 +369,7 @@ class UiWindow(QMainWindow):
                 self.dialog = QMessageBox()
                 self.dialog.setWindowTitle("Please enter a valid longitudinal value")
                 self.dialog.setText("The longitudinal value can lie between -180° and 180°. "
-                                 "\nSeparate the decimal values via a '.' (dot)." )
+                                    "\nSeparate the decimal values via a '.' (dot)." )
                 button = self.dialog.exec()
 
                 if button == QMessageBox.StandardButton.Ok:
@@ -367,6 +377,32 @@ class UiWindow(QMainWindow):
                     self.long_lineedit.clear()
                     self.long_lineedit.setStyleSheet("background-color: Linen")
 
+    def validate_iterations(self):
+        """Validation method to check if the user input in the iterations LineEdit is between bounds."""
+
+        if len(self.iter_lineedit.text()) == 0:
+            self.iter_lineedit.setStyleSheet("background-color: Linen")
+        else:
+            validation_rule = QIntValidator(1, 10000)
+            # locale = QLocale("en")
+            # validation_rule.setLocale(locale)
+
+            print(validation_rule.validate(self.iter_lineedit.text(), 1))
+
+            if validation_rule.validate(self.iter_lineedit.text(), 1)[0] == QIntValidator.State.Acceptable:
+                self.iter_lineedit.setStyleSheet("background-color: LightGreen")
+            else:
+                self.iter_lineedit.setStyleSheet("background-color: Crimson")
+                self.dialog = QMessageBox()
+                self.dialog.setWindowTitle("Please enter a valid iteration value")
+                self.dialog.setText("The iterations can lie between 1 and 10000 to ensure "
+                                    "a reasonable computation time.")
+                button = self.dialog.exec()
+
+                if button == QMessageBox.StandardButton.Ok:
+                    print("Ok!")
+                    self.iter_lineedit.clear()
+                    self.iter_lineedit.setStyleSheet("background-color: Linen")
 
     @staticmethod
     def round_half_up(n, decimals=0):
