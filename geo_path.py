@@ -1,20 +1,15 @@
-import pandas as pd
 from scipy import spatial
 import sys
-import numpy as np
 import geopy.distance
 import requests
-import timeit
 import json
 from Transport_cost_functions import *
 
 sys.path.append("shapefile_to_network/main/convertor")
 sys.path.append("shapefile_to_network/main/shortest_paths")
 
-from shapefile_to_network.main.convertor.GraphSimplify import GraphSimplify
 from shapefile_to_network.main.convertor.GraphConvertor import GraphConvertor
-from shapefile_to_network.main.shortest_paths.ShortestPath import ShortestPath, closest_node
-from shapefile_to_network.main.metrics.Centrality import Centrality
+from shapefile_to_network.main.shortest_paths.ShortestPath import ShortestPath
 from shapely import speedups
 
 speedups.disable()
