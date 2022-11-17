@@ -1,31 +1,28 @@
 import io
 import os
 import geopandas as gpd
-import shapefile as shp  # Requires the pyshp package
+import shapefile as shp
 import plotly
-import plotly.graph_objects as go
 import openrouteservice
 from openrouteservice import convert
 import folium
+import timeit
 from PyQt6.QtWebEngineWidgets import *
 from PyQt6.QtWidgets import *
 from print_results import *
-
 sys.path.append("/shapefile_to_network/main/convertor")
 sys.path.append("/shapefile_to_network/main/shortest_paths")
-
 from shapefile_to_network.main.convertor.GraphConvertor import GraphConvertor
 from shapefile_to_network.main.shortest_paths.ShortestPath import ShortestPath
-
 from shapely import speedups
 
 speedups.disable()
 
 
-# this application opens a dialog in which a file from results can be selected
-class fileselection(QWidget):
+class Visualizing(QWidget):
+    """this application opens a dialog in which a file from results can be selected"""
     def __init__(self, parent=None):
-        super(fileselection, self).__init__(parent)
+        super(Visualizing, self).__init__(parent)
 
         self.setGeometry(800, 500, 200, 100)
         self.layout = QVBoxLayout()
@@ -55,16 +52,26 @@ class fileselection(QWidget):
         self.df = pd.DataFrame()
 
     def filedialog(self):
+        """A file dialog is created where it's possible to select a file in the 'Results' folder."""
         d = QFileDialog()
-        relpathtoresults = os.path.join(os.path.dirname(__file__), r'Results')
-        activefile = QFileDialog.getOpenFileName(d, "select csv", relpathtoresults)
+        rel_path_to_results = os.path.join(os.path.dirname(__file__), r'Results')
+        active_file = QFileDialog.getOpenFileName(d, "select csv", rel_path_to_results)
 
-        # getOpenFilename somehow returns a tuple, therefore we only access the first element
-        df = pd.read_csv(activefile[0])
-        pd.DataFrame.info(df)
-        self.df = df
+        if active_file[0] == '':
+            pass
+        else:
+            # getOpenFilename somehow returns a tuple, therefore we only access the first element
+            df = pd.read_csv(active_file[0])
+            pd.DataFrame.info(df)
+            self.df = df
 
     def display_map(self):
+        """This Method can display the resulting transport route for the cheapest production location.
+        Every combination of transport methods can be displayed. Trucking between two points is
+        computed via openrouteservice. A pipeline is visualised by a straight line, since they're
+        hypothetical in this model. Transport by ship can happen along a shipping network derived
+        from real shipping paths obtained from tracking vessels."""
+
         # finds the place of the cheapest cost and stores its location as a tuple
         # stores the desired location as a tuple (location is the same for all rows of the df)
         min_cost = min(self.df['Total Cost per kg H2'])
@@ -593,7 +600,7 @@ class fileselection(QWidget):
 
 def main():
     app = QApplication(sys.argv)
-    w = fileselection()
+    w = Visualizing()
     w.show()
     sys.exit(app.exec())
 
