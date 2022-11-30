@@ -16,7 +16,7 @@ class UiWindow(QMainWindow):
         self.setGeometry(500, 200, 600, 400)
 
         self.window = QWidget()
-        self.window.setStyleSheet(" background-color: Linen ")
+        self.window.setStyleSheet(" background-color: MintCream ")
         # self.window.setStyleSheet(" QMainWindow.separator { background-color: red; width: 30; height: 30px } " )
 
         self.grid = QGridLayout()
@@ -146,7 +146,7 @@ class UiWindow(QMainWindow):
         self.results_textbox.setReadOnly(True)
         self.results_textbox.setAcceptRichText(True)
         self.results_textbox.setStyleSheet("QTextEdit { border-style: solid; border-width: 0.5px; "
-                                           "border-radius: 5px; background-color: Azure  } ")
+                                           "border-radius: 5px } ")
 
         # creates a button to start the model run and to open the sidebar for mapping of results
         self.run_button = QPushButton("run model")
@@ -312,7 +312,7 @@ class UiWindow(QMainWindow):
         self.display_map = QDockWidget("Load up a map")
         self.display_map.setStyleSheet("QDockWidget { "
                                        "width: auto; "
-                                       "background-color: HoneyDew }"
+                                       "background-color: MintCream }"
                                        "QDockWidget.title { "
                                        "padding-right: 3px} ")
         self.file_dialogue = DisplayMap.Visualizing()

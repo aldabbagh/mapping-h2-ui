@@ -27,6 +27,77 @@ class Visualizing(QWidget):
         self.setGeometry(800, 500, 200, 100)
         window_layout = QVBoxLayout()
         self.tabs = QTabWidget()
+        self.tabs.setStyleSheet("QTabWidget::pane {"
+                                "border: 1px solid black;"
+                                "background: MintCream }"
+                                
+                                "QTabWidget::tab-bar:top {"
+                                "top: 1px }"    
+                                
+                                "QTabWidget::tab-bar:bottom {"
+                                "bottom: 1px }"
+
+                                "QTabWidget::tab-bar:left {"
+                                "right: 1px }"
+
+                                "QTabWidget::tab-bar:right {"
+                                "left: 1px} "
+ 
+                                "QTabBar::tab {"
+                                "border: 1px solid black }"
+
+                                "QTabBar::tab:selected {"
+                                "background: DarkSeaGreen }"
+
+                                "QTabBar::tab:!selected {"
+                                "background: LightSteelBlue }"
+
+                                "QTabBar::tab:!selected:hover {"
+                                "background: #999 }"
+
+                                "QTabBar::tab:top:!selected {"
+                                "margin-top: 3px }"
+
+                                "QTabBar::tab:bottom:!selected {"
+                                "margin-bottom: 3px }"
+
+                                "QTabBar::tab:top, QTabBar::tab:bottom {"
+                                "min-width: 8ex;"
+                                "margin-right: -1px;"
+                                "padding: 5px 10px 5px 10px }"
+
+                                "QTabBar::tab:top:selected {"
+                                "border-bottom-color: none }"
+
+                                "QTabBar::tab:bottom:selected {"
+                                "border-top-color: none }"
+
+                                "QTabBar::tab:top:last, QTabBar::tab:bottom:last,"
+                                "QTabBar::tab:top:only-one, QTabBar::tab:bottom:only-one {"
+                                "margin-right: 0 }"
+
+                                "QTabBar::tab:left:!selected {"
+                                "margin-right: 3px }"
+
+                                "QTabBar::tab:right:!selected {"
+                                "margin-left: 3px }"
+
+                                "QTabBar::tab:left, QTabBar::tab:right {"
+                                "min-height: 8ex;"
+                                "margin-bottom: -1px;"
+                                "padding: 10px 5px 10px 5px }"
+
+                                "QTabBar::tab:left:selected {"
+                                "border-left-color: none }"
+
+                                "QTabBar::tab:right:selected {"
+                                "border-right-color: none }"
+
+                                "QTabBar::tab:left:last, QTabBar::tab:right:last,"
+                                "QTabBar::tab:left:only-one, QTabBar::tab:right:only-one {"
+                                "margin-bottom: 0}")
+
+
         self.tab1 = QWidget()
         self.tab2 = QWidget()
 
@@ -51,7 +122,7 @@ class Visualizing(QWidget):
     def tab1ui(self):
         self.tab1_layout = QVBoxLayout()
         b = QPushButton("select a .csv-file")
-        map_button = QPushButton("display map")
+        map_button = QPushButton("display route on world map")
         world_heatmap_button = QPushButton("display H2-price on world map")
 
         world_heatmap_result_metric_label = QLabel(" Plot the following result metric :")
@@ -70,11 +141,16 @@ class Visualizing(QWidget):
         world_heatmap_button.clicked.connect(self.plot_world_results_single_run)
 
         self.tab1.setLayout(self.tab1_layout)
+        self.tab1.setStyleSheet(
+            "QPushButton {background-color: DarkSeaGreen}"
+            "QComboBox {background-color: DarkSeaGreen;"
+            "padding: 2px 1px 2px 5px }"
+        )
 
     def tab2ui(self):
         self.tab2_layout = QVBoxLayout()
         b = QPushButton("select a .csv-file")
-        world_heatmap_button = QPushButton("display H2-price on world map")
+        world_heatmap_button = QPushButton("display H2-price for all locations")
         self.tab2_layout.addWidget(b)
         self.tab2_layout.addWidget(world_heatmap_button)
 
@@ -82,6 +158,10 @@ class Visualizing(QWidget):
         world_heatmap_button.clicked.connect(self.plot_world_results_mc)
 
         self.tab2.setLayout(self.tab2_layout)
+
+        self.tab2.setStyleSheet(
+            "QPushButton {background-color: DarkSeaGreen}"
+        )
 
     def filedialog(self):
         """A file dialog is created where it's possible to select a file in the 'Results' folder."""
