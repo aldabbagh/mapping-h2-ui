@@ -1,5 +1,5 @@
 import io
-import os
+import sys, os
 import geopandas as gpd
 import shapefile as shp
 import plotly
@@ -166,7 +166,13 @@ class Visualizing(QWidget):
     def filedialog(self):
         """A file dialog is created where it's possible to select a file in the 'Results' folder."""
         d = QFileDialog()
-        rel_path_to_results = os.path.join(os.path.dirname(__file__), r'Results')
+
+        if getattr(sys, 'frozen', False):
+            application_path = sys._MEIPASS
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+
+        rel_path_to_results = os.path.join(application_path, r'Results')
         active_file = QFileDialog.getOpenFileName(d, "select csv", rel_path_to_results)
 
         if active_file[0] == '':
@@ -179,7 +185,13 @@ class Visualizing(QWidget):
 
     def mc_filedialog(self):
         mc_d = QFileDialog()
-        rel_path_to_results_mc = os.path.join(os.path.dirname(__file__), r'Results/mc')
+
+        if getattr(sys, 'frozen', False):
+            application_path = sys._MEIPASS
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+
+        rel_path_to_results_mc = os.path.join(application_path, r'Results/mc')
         active_file = QFileDialog.getOpenFileName(mc_d, "select csv", rel_path_to_results_mc)
 
         if active_file[0] == '':
