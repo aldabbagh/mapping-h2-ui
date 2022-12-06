@@ -13,7 +13,7 @@ class UiWindow(QMainWindow):
     def __init__(self):
         super(UiWindow, self).__init__()
         self.setWindowTitle("H2 mapping UI")
-        self.setGeometry(500, 200, 600, 400)
+        self.setGeometry(500, 500, 650, 450)
 
         self.window = QWidget()
         self.window.setStyleSheet(" background-color: MintCream ")
@@ -80,7 +80,7 @@ class UiWindow(QMainWindow):
         # create combobox with electrolyzer options
         self.electro_label = QLabel("electrolyzer type :")
         self.electro_combo = QComboBox()
-        self.electro_combo.addItems(["soe", "alkaline", "pem"])
+        self.electro_combo.addItems(["alkaline", "solid oxide electrolyzer cell", "polymer electrolyte membrane"])
 
         # put label and combo box into a layout
         self.electro_layout = QHBoxLayout()
@@ -147,11 +147,20 @@ class UiWindow(QMainWindow):
         self.results_textbox.setAcceptRichText(True)
         self.results_textbox.setStyleSheet("QTextEdit { border-style: solid; border-width: 0.5px; "
                                            "border-radius: 5px } ")
+        self.results_textbox.setText("Before starting a calculation please enter the coordinates of the desired "
+                                     "end location, the yearly hydrogen demand at the site and the rest of the "
+                                     "parameters. If you want the model to run as a Monte-Carlo simulation check "
+                                     "the corresponding box and enter the number of iterations. Please note that "
+                                     "the higher the number of iterations the higher the computation time will be. "
+                                     "\nIf you are satisfied with your inputs you can click on the 'run model' button "
+                                     "to start the calculation. The program window will become unresponsive for the "
+                                     "duration of the model run. Running times can vary between 15 and 60 minutes "
+                                     "depending on the complexity of the model and the computer hardware used. ")
 
         # creates a button to start the model run and to open the sidebar for mapping of results
         self.run_button = QPushButton("run model")
         self.run_button.setStyleSheet("QPushButton { background-color: LightBlue  } ")
-        self.map_dialog_button = QPushButton("open 'DisplayMap' sidebar")
+        self.map_dialog_button = QPushButton("open Visualisation sidebar")
         self.map_dialog_button.setStyleSheet("QPushButton { background-color: Khaki} ")
         self.run_map_button_layout = QVBoxLayout()
         self.run_map_button_layout.addWidget(self.run_button)
@@ -252,7 +261,6 @@ class UiWindow(QMainWindow):
             min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path = self.computing.run_single_model()
             rounded_cost = self.round_half_up(min_cost, 2)
             self.results_textbox.setText(str(rounded_cost) + "€/kg")
-            self.results_textbox.append("Index: " + str(mindex))
             self.results_textbox.append("Cheapest source location: " + str(cheapest_source))
             self.results_textbox.append("Cheapest transport medium: " + str(cheapest_medium))
             self.results_textbox.append("Cheaper electricity: " + str(cheapest_elec))
@@ -304,7 +312,12 @@ class UiWindow(QMainWindow):
     def set_elec_type(self):
         electrolyzer_type = self.electro_combo.currentText()
         print("The electrolyzer type was set to: " + electrolyzer_type)
-        self.parameter_set.electrolyzer_type = electrolyzer_type
+        if electrolyzer_type == "alkaline":
+            self.parameter_set.electrolyzer_type = "alkaline"
+        elif electrolyzer_type == "solid oxide electrolyzer cell":
+            self.parameter_set.electrolyzer_type = "SOEC"
+        else:
+            self.parameter_set.electrolyzer_type = "PEM"
 
     def load_new_mapwidget(self):
         """This Method creates a new docked 'Visualisation' Widget"""

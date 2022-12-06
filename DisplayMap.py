@@ -109,7 +109,7 @@ class Visualizing(QWidget):
         self.tab2ui()
 
         self.tabs.addTab(self.tab1, "single run")
-        self.tabs.addTab(self.tab2, "Monte-Carlo runs")
+        self.tabs.addTab(self.tab2, "Monte-Carlo Sim.")
 
         self.setWindowTitle("Data Visualisation")
         self.df = pd.DataFrame()
@@ -150,7 +150,7 @@ class Visualizing(QWidget):
     def tab2ui(self):
         self.tab2_layout = QVBoxLayout()
         b = QPushButton("select a .csv-file")
-        world_heatmap_button = QPushButton("display H2-price for all locations")
+        world_heatmap_button = QPushButton("display mean of H2-price for all locations")
         self.tab2_layout.addWidget(b)
         self.tab2_layout.addWidget(world_heatmap_button)
 
