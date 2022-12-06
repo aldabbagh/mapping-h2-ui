@@ -1,3 +1,4 @@
 /.idea/
 /Results/
-/Data/shipping/port_index.csv
+/Data/port_index.csv
+/plot_results.py
