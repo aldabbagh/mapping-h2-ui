@@ -1,7 +1,5 @@
-import pandas as pd
-from Transport_cost_functions import *
 from geo_path import *
-import plotly.graph_objects as go
+
 
 def print_basic_results(df):
     """Prints the important results from the input dataframe."""

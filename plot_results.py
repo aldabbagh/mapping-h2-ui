@@ -1,6 +1,4 @@
-import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
+
 
 def plot_maps(df):
     """Plots maps showing various cost metrics for producing H2."""
