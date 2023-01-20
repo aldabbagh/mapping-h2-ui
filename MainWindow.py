@@ -322,7 +322,7 @@ class UiWindow(QMainWindow):
     def load_new_mapwidget(self):
         """This Method creates a new docked 'Visualisation' Widget"""
 
-        self.display_map = QDockWidget("Load up a map")
+        self.display_map = QDockWidget("Visualisation sidebar")
         self.display_map.setStyleSheet("QDockWidget { "
                                        "width: auto; "
                                        "background-color: MintCream }"

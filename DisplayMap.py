@@ -109,8 +109,8 @@ class Visualizing(QWidget):
         self.tab1ui()
         self.tab2ui()
 
-        self.tabs.addTab(self.tab1, "single run")
-        self.tabs.addTab(self.tab2, "Monte-Carlo Sim.")
+        self.tabs.addTab(self.tab1, "Single Run")
+        self.tabs.addTab(self.tab2, "Monte Carlo Sim.")
 
         self.setWindowTitle("Data Visualisation")
         self.df = pd.DataFrame()
