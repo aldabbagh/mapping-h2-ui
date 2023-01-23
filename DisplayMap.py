@@ -4,6 +4,7 @@ from pathlib import Path
 import geopandas as gpd
 import shapefile as shp
 import plotly
+import plotly.graph_objects as go
 import openrouteservice
 from openrouteservice import convert
 import folium
