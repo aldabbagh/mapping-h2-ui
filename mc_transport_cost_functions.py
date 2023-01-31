@@ -74,47 +74,6 @@ def nh3_shipping_costs(ship_dist, convert=True, centralised=True):
 
     return conversion + export + ship + reconversion
 
-# def nh3_costs(pipe_dist=0, ship_dist=0, truck_dist=0, convert=True, centralised=True, pipeline=True, max_pipeline_dist=2000):
-#     """Calculates the transport cost of NH3. Requires as input the distance that NH3 will be piped, shipped and
-#     trucked, as well as a boolean variable denominating if the distribution point is centralised or not.
-#     Calculation values are drawn from triangular distributions."""
-#
-#     if convert == True:
-#         conversion = np.random.triangular(0.918, 1.02, 1.122)
-#         export = np.random.triangular(0.099, 0.11, 0.121)
-#         if centralised:
-#             reconversion = np.random.triangular(0.765, 0.85, 0.935)
-#         else:
-#             reconversion = np.random.triangular(1.017, 1.13, 1.243)
-#     else:
-#         conversion = 0
-#         reconversion = 0
-#         export = 0
-#
-#     if ship_dist == 0:
-#         ship=0
-#     else:
-#         ship = np.random.triangular(2.0907E-02, 2.323E-02, 2.5553E-2) * np.log(ship_dist) - 1.523E-02
-#
-#     if max_pipeline_dist > pipe_dist > 400:
-#         pipe = np.random.triangular(0.00063, 0.0007, 0.00077) * pipe_dist - 0.0697
-#     elif pipe_dist < 400:
-#         pipe = np.random.triangular(0.00063, 0.0007, 0.00077) * 400 - 0.0697
-#     else:
-#         pipe = np.nan
-#
-#     if pipeline == False:
-#         pipe = np.nan
-#
-#     if truck_dist == 0:
-#         truck = 0
-#     else:
-#         truck = np.random.triangular(0.00072, 0.0008, 0.00088) * truck_dist + 0.0664
-#
-#     total = conversion + export + ship + pipe + truck + reconversion
-#
-#     return total
-
 def h2_gas_trucking_costs(truck_dist):
     """Calculates the transport cost of H2 gas. Requires as input the distance that H2 will be trucked."""
 
@@ -133,28 +92,6 @@ def h2_gas_piping_costs(pipe_dist, max_pipeline_dist):
         pipe = np.nan
 
     return pipe
-
-# def h2_gas_costs(pipe_dist=0, truck_dist=0, pipeline=True, max_pipeline_dist=2000):
-#     """Calculates the transport cost of H2 gas. Requires as input the distance that H2 will be piped and
-#     trucked. Calculation values are drawn from triangular distributions."""
-#
-#     if max_pipeline_dist > pipe_dist > 400:
-#         pipe = np.random.triangular(0.00036, 0.0004, 0.00044) * pipe_dist + 0.0424
-#     elif pipe_dist < 400:
-#         pipe = np.random.triangular(0.00036, 0.0004, 0.00044) * 400 + 0.0424
-#     else:
-#         pipe = np.nan
-#
-#     if pipeline == False:
-#         pipe = np.nan
-#
-#     if truck_dist == 0:
-#         truck = 0
-#     else:
-#         truck = np.random.triangular(0.0027, 0.003, 0.0033) * truck_dist + 0.3319
-#
-#     return pipe + truck
-
 
 def lohc_costs(ship_dist=0, truck_dist=0, convert=True, centralised=True):
     """Calculates the transport cost of LOHC. Requires as input the distance that LOHC will be shipped and
