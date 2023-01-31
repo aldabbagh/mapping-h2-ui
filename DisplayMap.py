@@ -123,9 +123,9 @@ class Visualizing(QWidget):
 
     def tab1ui(self):
         self.tab1_layout = QVBoxLayout()
-        b = QPushButton("select a .csv-file")
-        map_button = QPushButton("display route on world map")
-        world_heatmap_button = QPushButton("display H2-price on world map")
+        b = QPushButton("Select a .csv-file from the 'Results'-folder")
+        map_button = QPushButton("Display route on world map")
+        world_heatmap_button = QPushButton("display the selected metric on world map")
 
         world_heatmap_result_metric_label = QLabel(" Plot the following result metric :")
 
@@ -151,8 +151,8 @@ class Visualizing(QWidget):
 
     def tab2ui(self):
         self.tab2_layout = QVBoxLayout()
-        b = QPushButton("select a .csv-file")
-        world_heatmap_button = QPushButton("display mean of H2-price for all locations")
+        b = QPushButton("Select a .csv-file from the 'Results/mc'-folder")
+        world_heatmap_button = QPushButton("Display selected datafile on a world map")
         self.tab2_layout.addWidget(b)
         self.tab2_layout.addWidget(world_heatmap_button)
 

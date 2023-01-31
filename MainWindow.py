@@ -13,17 +13,16 @@ class UiWindow(QMainWindow):
     def __init__(self):
         super(UiWindow, self).__init__()
         self.setWindowTitle("H2 mapping UI")
-        self.setGeometry(500, 500, 650, 450)
+        self.setGeometry(500, 500, 650, 500)
 
         self.window = QWidget()
         self.window.setStyleSheet(" background-color: MintCream ")
-        # self.window.setStyleSheet(" QMainWindow.separator { background-color: red; width: 30; height: 30px } " )
 
         self.grid = QGridLayout()
 
         # create groupbox for the coordinates, labels for latitude and longitude
         # as well as input-boxes for latitude and longitude values
-        self.coord_groupbox = QGroupBox("coordinates")
+        self.coord_groupbox = QGroupBox("Coordinates")
         self.coord_groupbox.setStyleSheet("QGroupBox { border-style: solid; border-width: 0.5px; "
                                           "border-radius: 5px; "
                                           "padding-top: 10px; padding-bottom: 3px } ")
@@ -31,8 +30,8 @@ class UiWindow(QMainWindow):
         self.coord_groupbox_layout = QVBoxLayout()
         self.coord_groupbox.setLayout(self.coord_groupbox_layout)
 
-        self.long_label = QLabel("longitude :")
-        self.lat_label = QLabel("latitude :")
+        self.long_label = QLabel("Longitude :")
+        self.lat_label = QLabel("Latitude :")
         self.long_lineedit = QLineEdit()
         self.long_lineedit.setPlaceholderText("Enter longitudinal value")
         self.lat_lineedit = QLineEdit()
@@ -51,7 +50,7 @@ class UiWindow(QMainWindow):
         self.coord_groupbox_layout.addLayout(self.long_hbox)
 
         # creates the year groupbox and a combo box with the options of choosing 2020, 2030, 2040, 2050
-        self.year_groupbox = QGroupBox("year")
+        self.year_groupbox = QGroupBox("Year")
         self.year_groupbox.setStyleSheet("QGroupBox { border-style: solid; border-width: 0.5px; "
                                          "border-radius: 5px; padding-top: 10px; padding-bottom: 3px }")
         self.year_groupbox_layout = QVBoxLayout()
@@ -69,7 +68,7 @@ class UiWindow(QMainWindow):
 
         # creates the yearly hydrogen demand label and a spinbox that takes values between 1 and 1 million
         # the value can be changed in steps of 10 via the arrows; arrange it in a HBox layout with the label
-        self.hhdemand_label = QLabel("yearly hydrogen demand (in kilotons) :")
+        self.hhdemand_label = QLabel("Yearly hydrogen demand (in kilotons) :")
         self.hhdemand_spinbox = QDoubleSpinBox()
         self.hhdemand_spinbox.setRange(0, 1000000)
         self.hhdemand_spinbox.setSingleStep(10)
@@ -78,7 +77,7 @@ class UiWindow(QMainWindow):
         self.hhdemand_layout.addWidget(self.hhdemand_spinbox)
 
         # create combobox with electrolyzer options
-        self.electro_label = QLabel("electrolyzer type :")
+        self.electro_label = QLabel("Electrolyzer type :")
         self.electro_combo = QComboBox()
         self.electro_combo.addItems(["alkaline", "solid oxide electrolyzer cell", "polymer electrolyte membrane"])
 
@@ -88,23 +87,23 @@ class UiWindow(QMainWindow):
         self.electro_layout.addWidget(self.electro_combo)
 
         # creates a checkbox to decide whether to allow central conversion facilities
-        self.conversion_checkbox = QCheckBox("allow central conversion")
+        self.conversion_checkbox = QCheckBox("Allow central conversion")
 
         self.demand_conversion_groupbox_layout.addLayout(self.hhdemand_layout)
         self.demand_conversion_groupbox_layout.addLayout(self.electro_layout)
         self.demand_conversion_groupbox_layout.addWidget(self.conversion_checkbox)
 
         # create a groupbox for the pipeline related widgets
-        self.pipe_groupbox = QGroupBox("pipelines")
+        self.pipe_groupbox = QGroupBox("Pipelines")
         self.pipe_groupbox.setStyleSheet("QGroupBox { border-style: solid; border-width: 0.5px; "
                                          "border-radius: 5px; padding-top: 10px } ")
         self.pipe_groupbox_layout = QVBoxLayout()
 
         # creates a checkbox to decide whether to allow pipelines as transport medium or not
-        self.pipe_checkbox = QCheckBox("allow pipelines")
+        self.pipe_checkbox = QCheckBox("Allow pipelines")
 
         # creates label and input box for
-        self.maxpipe_label = QLabel("maximum pipeline length :")
+        self.maxpipe_label = QLabel("Maximum pipeline length :")
         self.maxpipe_spinbox = QSpinBox()
         self.maxpipe_spinbox.setRange(0, 20000)
         self.maxpipe_spinbox.setSingleStep(10)
@@ -117,18 +116,18 @@ class UiWindow(QMainWindow):
         self.pipe_groupbox.setLayout(self.pipe_groupbox_layout)
 
         # groupbox to contain the monte carlo widgets
-        self.mc_widgets_groupbox = QGroupBox("monte-carlo-simulation")
+        self.mc_widgets_groupbox = QGroupBox("Monte Carlo simulation")
         self.mc_widgets_groupbox.setStyleSheet("QGroupBox { border-style: solid; border-width: 0.5px; "
                                                "border-radius: 5px; padding-top: 10px } ")
         self.mc_widgets_groupbox_layout = QVBoxLayout()
 
         # creates a checkbox with the option to toggle between single run and monte carlo sim
         self.mc_checkbox = QCheckBox()
-        self.mc_checkbox.setText("run as monte-carlo-simulation")
+        self.mc_checkbox.setText("Run as monte-carlo-simulation")
 
         # creates optional parameter inputs for monte carlo sim
         # create label and lineedit to put in iterations
-        self.iter_label = QLabel("iterations: ")
+        self.iter_label = QLabel("Iterations: ")
         self.iter_lineedit = QLineEdit()
         self.iter_lineedit.setPlaceholderText("Enter the number of iterations")
 
@@ -158,10 +157,10 @@ class UiWindow(QMainWindow):
                                      "depending on the complexity of the model and the computer hardware used. ")
 
         # creates a button to start the model run and to open the sidebar for mapping of results
-        self.run_button = QPushButton("run model")
-        self.run_button.setStyleSheet("QPushButton { background-color: LightBlue  } ")
-        self.map_dialog_button = QPushButton("open Visualisation sidebar")
-        self.map_dialog_button.setStyleSheet("QPushButton { background-color: Khaki} ")
+        self.run_button = QPushButton("Run Model")
+        self.run_button.setStyleSheet("QPushButton { background-color: LightBlue } ")
+        self.map_dialog_button = QPushButton("Open Visualisation Sidebar")
+        self.map_dialog_button.setStyleSheet("QPushButton { background-color: LightBlue } ")
         self.run_map_button_layout = QVBoxLayout()
         self.run_map_button_layout.addWidget(self.run_button)
         self.run_map_button_layout.addWidget(self.map_dialog_button)
