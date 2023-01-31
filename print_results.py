@@ -20,7 +20,7 @@ def print_basic_results(df):
     return min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec
 
 
-def get_path(df, end_plant_tuple, centralised, pipeline):
+def get_path(df, end_plant_tuple, centralised, pipeline, max_pipeline_dist):
     """Prints and plots the path of transport taken from the cheapest found solution."""
 
     min_cost = min(df['Total Cost per kg H2'])
@@ -37,49 +37,70 @@ def get_path(df, end_plant_tuple, centralised, pipeline):
         driving_distance_end = np.nan
 
     # Calculate minimum costs from end port to end location for all medium possibilities
-    end_nh3_options = [nh3_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised),
-                       nh3_costs(pipe_dist=direct_distance_end, convert=False, centralised=centralised, pipeline=pipeline),
-                       h2_gas_costs(pipe_dist=direct_distance_end, pipeline=pipeline),
-                       h2_gas_costs(truck_dist=driving_distance_end)]
+    nh3_port_to_loc_end_trucking=nh3_trucking_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised)
+    nh3_port_to_loc_end_piping=nh3_piping_costs(pipe_dist=direct_distance_end * 1.2, convert=False, centralised=centralised, max_pipeline_dist=max_pipeline_dist)
+    h2_gas_port_to_loc_end_trucking=h2_gas_trucking_costs(truck_dist=driving_distance_end)
+    h2_gas_port_to_loc_end_piping=h2_gas_piping_costs(pipe_dist=direct_distance_end * 1.2, max_pipeline_dist=max_pipeline_dist)
+
+    if pipeline == True:
+        end_nh3_options=[nh3_port_to_loc_end_trucking, h2_gas_port_to_loc_end_trucking,
+                         nh3_port_to_loc_end_piping, h2_gas_port_to_loc_end_piping]
+    else:
+        end_nh3_options=[nh3_port_to_loc_end_trucking, h2_gas_port_to_loc_end_trucking]
+
     cost_end_nh3 = np.nanmin(end_nh3_options)
+
     try:
         end_nh3_transport = end_nh3_options.index(np.nanmin(end_nh3_options))
         if end_nh3_transport == 0:
             nh3_end = 'NH3 Truck'
         elif end_nh3_transport == 1:
-            nh3_end = 'NH3 Pipe'
-        elif end_nh3_transport == 2:
-            nh3_end = 'H2 Gas Pipe'
-        elif end_nh3_transport == 3:
             nh3_end = 'H2 Gas Truck'
+        elif end_nh3_transport == 2:
+            nh3_end = 'NH3 Pipe'
+        elif end_nh3_transport == 3:
+            nh3_end = 'H2 Gas Pipe'
+
     except:
         nh3_end = 'Not possible'
-    end_lohc_options = [lohc_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised),
-                        h2_gas_costs(pipe_dist=direct_distance_end, pipeline=pipeline),
-                        h2_gas_costs(truck_dist=driving_distance_end)]
+
+    lohc_port_to_loc_end=lohc_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised)
+
+    if pipeline == True:
+        end_lohc_options=[lohc_port_to_loc_end, h2_gas_port_to_loc_end_trucking, h2_gas_port_to_loc_end_piping]
+    else:
+        end_lohc_options=[lohc_port_to_loc_end, h2_gas_port_to_loc_end_trucking]
+
     cost_end_lohc = np.nanmin(end_lohc_options)
     try:
         end_lohc_transport = end_lohc_options.index(np.nanmin(end_lohc_options))
         if end_lohc_transport == 0:
             lohc_end = 'LOHC Truck'
         elif end_lohc_transport == 1:
-            lohc_end = 'H2 Gas Pipe'
-        elif end_lohc_transport == 2:
             lohc_end = 'H2 Gas Truck'
+        elif end_lohc_transport == 2:
+            lohc_end = 'H2 Gas Pipe'
+
     except:
         lohc_end = 'Not possible'
-    end_h2_liq_options = [h2_liq_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised),
-                          h2_gas_costs(pipe_dist=direct_distance_end, pipeline=pipeline),
-                          h2_gas_costs(truck_dist=driving_distance_end)]
+
+    h2_liq_port_to_loc_end=h2_liq_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised)
+
+    if pipeline == True:
+        end_h2_liq_options = [h2_liq_port_to_loc_end, h2_gas_port_to_loc_end_trucking, h2_gas_port_to_loc_end_piping]
+    else:
+        end_h2_liq_options = [h2_liq_port_to_loc_end, h2_gas_port_to_loc_end_trucking]
+
     cost_end_h2_liq = np.nanmin(end_h2_liq_options)
     try:
         end_h2_liq_transport = end_h2_liq_options.index(np.nanmin(end_h2_liq_options))
         if end_h2_liq_transport == 0:
             h2_liq_end = 'H2 Liq Truck'
         elif end_h2_liq_transport == 1:
-            h2_liq_end = 'H2 Gas Pipe'
-        elif end_h2_liq_transport == 2:
             h2_liq_end = 'H2 Gas Truck'
+        elif end_h2_liq_transport == 2:
+            h2_liq_end = 'H2 Gas Pipe'
+
     except:
         h2_liq_end = 'Not possible'
 
@@ -97,55 +118,75 @@ def get_path(df, end_plant_tuple, centralised, pipeline):
         driving_distance_total = np.nan
 
     # Calculate minimum costs from gen to start port for all medium possibilities
-    start_nh3_options = [
-        nh3_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised),
-        nh3_costs(pipe_dist=df.at[mindex, 'Gen-Port Direct Dist.'], convert=False, centralised=centralised, pipeline=pipeline),
-        h2_gas_costs(pipe_dist=df.at[mindex, 'Gen-Port Direct Dist.'], pipeline=pipeline),
-        h2_gas_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'])]
+    nh3_gen_to_port_trucking = nh3_trucking_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'], convert=False,
+                                                  centralised=centralised)
+    nh3_gen_to_port_piping = nh3_piping_costs(pipe_dist=df.at[mindex, 'Gen-Port Direct Dist.'] * 1.2, convert=False,
+                                              centralised=centralised, max_pipeline_dist=max_pipeline_dist)
+    h2_gas_gen_to_port_trucking = h2_gas_trucking_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'])
+    h2_gas_gen_to_port_piping = h2_gas_piping_costs(pipe_dist=df.at[mindex, 'Gen-Port Direct Dist.'] * 1.2,
+                                                    max_pipeline_dist=max_pipeline_dist)
+
+    if pipeline == True:
+        start_nh3_options = [nh3_gen_to_port_trucking, h2_gas_gen_to_port_trucking,
+                             h2_gas_gen_to_port_piping, nh3_gen_to_port_piping]
+    else:
+        start_nh3_options = [nh3_gen_to_port_trucking, h2_gas_gen_to_port_trucking]
+
     cost_start_nh3 = np.nanmin(start_nh3_options)
     start_nh3_transport = start_nh3_options.index(np.nanmin(start_nh3_options))
+
     if start_nh3_transport == 0:
         nh3_start = 'NH3 Truck'
     elif start_nh3_transport == 1:
-        nh3_start = 'NH3 Pipe'
+        nh3_start = 'H2 Gas Truck'
     elif start_nh3_transport == 2:
         nh3_start = 'H2 Gas Pipe'
     elif start_nh3_transport == 3:
-        nh3_start = 'H2 Gas Truck'
-    start_lohc_options = [
-        lohc_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised),
-        h2_gas_costs(pipe_dist=df.at[mindex, 'Gen-Port Direct Dist.'], pipeline=pipeline),
-        h2_gas_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'])]
+        nh3_start = 'NH3 Pipe'
+
+    lohc_gen_to_port_start = lohc_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'], convert=False,
+                                        centralised=centralised)
+
+    if pipeline == True:
+        start_lohc_options = [lohc_gen_to_port_start, h2_gas_gen_to_port_trucking, h2_gas_gen_to_port_piping]
+    else:
+        start_lohc_options = [lohc_gen_to_port_start, h2_gas_gen_to_port_trucking]
+
     cost_start_lohc = np.nanmin(start_lohc_options)
     start_lohc_transport = start_lohc_options.index(np.nanmin(start_lohc_options))
     if start_lohc_transport == 0:
         lohc_start = 'LOHC Truck'
     elif start_lohc_transport == 1:
-        lohc_start = 'H2 Gas Pipe'
-    elif start_lohc_transport == 2:
         lohc_start = 'H2 Gas Truck'
-    start_h2_liq_options = [
-        h2_liq_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised),
-        h2_gas_costs(pipe_dist=df.at[mindex, 'Gen-Port Direct Dist.'], pipeline=pipeline),
-        h2_gas_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'])]
+    elif start_lohc_transport == 2:
+        lohc_start = 'H2 Gas Pipe'
+
+    h2_liq_gen_to_port_start = h2_liq_costs(truck_dist=df.at[mindex, 'Gen-Port Driving Dist.'], convert=False,
+                                            centralised=centralised)
+
+    if pipeline == True:
+        start_h2_liq_options = [h2_liq_gen_to_port_start, h2_gas_gen_to_port_trucking, h2_gas_gen_to_port_piping]
+    else:
+        start_h2_liq_options = [h2_liq_gen_to_port_start, h2_gas_gen_to_port_trucking]
+
     cost_start_h2_liq = np.nanmin(start_h2_liq_options)
     start_h2_liq_transport = start_h2_liq_options.index(np.nanmin(start_h2_liq_options))
     if start_h2_liq_transport == 0:
         h2_liq_start = 'H2 Liq Truck'
     elif start_h2_liq_transport == 1:
-        h2_liq_start = 'H2 Gas Pipe'
-    elif start_h2_liq_transport == 2:
         h2_liq_start = 'H2 Gas Truck'
+    elif start_h2_liq_transport == 2:
+        h2_liq_start = 'H2 Gas Pipe'
 
     # Calculate shipping costs
-    cost_shipping_nh3 = nh3_costs(ship_dist=df['Shipping Dist.'][mindex], centralised=centralised)
+    cost_shipping_nh3 = nh3_shipping_costs(ship_dist=df['Shipping Dist.'][mindex], centralised=centralised)
     cost_shipping_lohc = lohc_costs(ship_dist=df['Shipping Dist.'][mindex], centralised=centralised)
     cost_shipping_h2_liq = h2_liq_costs(ship_dist=df['Shipping Dist.'][mindex], centralised=centralised)
 
     # Calculate minimum total transport costs for each medium
     total_nh3_options = [(cost_start_nh3 + cost_shipping_nh3 + cost_end_nh3),
-                         nh3_costs(truck_dist=driving_distance_total, centralised=centralised),
-                         nh3_costs(pipe_dist=direct_distance_total, centralised=centralised, pipeline=pipeline)]
+                         nh3_trucking_costs(truck_dist=driving_distance_total, centralised=centralised),
+                         nh3_piping_costs(pipe_dist=direct_distance_total * 1.2, centralised=centralised, max_pipeline_dist=max_pipeline_dist)]
     nh3_options = total_nh3_options.index(np.nanmin(total_nh3_options))
     if nh3_options == 0:
         nh3 = 'NH3 Ship'
@@ -167,8 +208,8 @@ def get_path(df, end_plant_tuple, centralised, pipeline):
         h2_liq = 'H2 Liq Ship'
     elif h2_liq_options == 1:
         h2_liq = 'H2 Liq Truck'
-    total_h2_gas_options = [h2_gas_costs(truck_dist=driving_distance_total),
-                            h2_gas_costs(pipe_dist=direct_distance_total, pipeline=pipeline)]
+    total_h2_gas_options = [h2_gas_trucking_costs(truck_dist=driving_distance_total),
+                            h2_gas_piping_costs(pipe_dist=direct_distance_total * 1.2, max_pipeline_dist=max_pipeline_dist)]
     try:
         h2_gas_options = total_h2_gas_options.index(np.nanmin(total_h2_gas_options))
         if h2_gas_options == 0:

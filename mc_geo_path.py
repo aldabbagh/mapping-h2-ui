@@ -150,47 +150,75 @@ def mc_transport_costs(df, end_plant_tuple, h2_demand, cost_end_nh3, cost_end_lo
 
     for i in range(len(df)):
         # Calculate minimum costs from gen to start port for all medium possibilities
-        start_nh3_options = [
-            nh3_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised),
-            nh3_costs(pipe_dist=df.at[i, 'Gen-Port Direct Dist.'], convert=False, centralised=centralised,
-                      pipeline=pipeline, max_pipeline_dist=max_pipeline_dist),
-            h2_gas_costs(pipe_dist=df.at[i, 'Gen-Port Direct Dist.'], pipeline=pipeline,
-                         max_pipeline_dist=max_pipeline_dist),
-            h2_gas_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'])]
+        """NH3"""
+        nh3_gen_to_port_trucking = nh3_trucking_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'], convert=False,
+                                                      centralised=centralised)
+        nh3_gen_to_port_piping = nh3_piping_costs(pipe_dist=df.at[i, 'Gen-Port Direct Dist.'] * 1.2, convert=False,
+                                                  centralised=centralised, max_pipeline_dist=max_pipeline_dist)
+        h2_gas_gen_to_port_trucking = h2_gas_trucking_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'])
+        h2_gas_gen_to_port_piping = h2_gas_piping_costs(pipe_dist=df.at[i, 'Gen-Port Direct Dist.'] * 1.2,
+                                                        max_pipeline_dist=max_pipeline_dist)
+
+        if pipeline == True:
+            start_nh3_options = [nh3_gen_to_port_piping, nh3_gen_to_port_trucking, h2_gas_gen_to_port_piping,
+                                 h2_gas_gen_to_port_trucking]
+        else:
+            start_nh3_options = [nh3_gen_to_port_trucking, h2_gas_gen_to_port_trucking]
+
         cost_start_nh3 = np.nanmin(start_nh3_options)
-        start_lohc_options = [
-            lohc_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised),
-            h2_gas_costs(pipe_dist=df.at[i, 'Gen-Port Direct Dist.'], pipeline=pipeline,
-                         max_pipeline_dist=max_pipeline_dist),
-            h2_gas_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'])]
+
+        """LOHC"""
+        lohc_gen_to_port_start = lohc_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised)
+
+        if pipeline == True:
+            start_lohc_options = [lohc_gen_to_port_start, h2_gas_gen_to_port_trucking, h2_gas_gen_to_port_piping]
+        else:
+            start_lohc_options = [lohc_gen_to_port_start, h2_gas_gen_to_port_trucking]
+
         cost_start_lohc = np.nanmin(start_lohc_options)
-        start_h2_liq_options = [
-            h2_liq_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised),
-            h2_gas_costs(pipe_dist=df.at[i, 'Gen-Port Direct Dist.'], pipeline=pipeline,
-                         max_pipeline_dist=max_pipeline_dist),
-            h2_gas_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'])]
+
+        """liq. H2"""
+        h2_liq_gen_to_port_start = h2_liq_costs(truck_dist=df.at[i, 'Gen-Port Driving Dist.'], convert=False, centralised=centralised)
+
+        if pipeline == True:
+            start_h2_liq_options = [h2_liq_gen_to_port_start, h2_gas_gen_to_port_trucking, h2_gas_gen_to_port_piping]
+        else:
+            start_h2_liq_options = [h2_liq_gen_to_port_start, h2_gas_gen_to_port_trucking]
+
         cost_start_h2_liq = np.nanmin(start_h2_liq_options)
 
         # Calculate shipping costs
-        cost_shipping_nh3 = nh3_costs(ship_dist=df.at[i, 'Shipping Dist.'], centralised=centralised)
+        cost_shipping_nh3 = nh3_shipping_costs(ship_dist=df.at[i, 'Shipping Dist.'], centralised=centralised)
         cost_shipping_lohc = lohc_costs(ship_dist=df.at[i, 'Shipping Dist.'], centralised=centralised)
         cost_shipping_h2_liq = h2_liq_costs(ship_dist=df.at[i, 'Shipping Dist.'], centralised=centralised)
 
         # Calculate minimum total transport costs for each medium
-        total_nh3_options = [(cost_start_nh3 + cost_shipping_nh3 + cost_end_nh3),
-                             nh3_costs(truck_dist=df.at[i, 'Driving Dist.'], centralised=centralised),
-                             nh3_costs(pipe_dist=df.at[i, 'Direct Dist.'], centralised=centralised, pipeline=pipeline,
-                                       max_pipeline_dist=max_pipeline_dist)]
+        nh3_trucking_all_way=nh3_trucking_costs(truck_dist=df.at[i, 'Driving Dist.'], centralised=centralised)
+        nh3_piping_all_way=nh3_piping_costs(pipe_dist=df.at[i, 'Direct Dist.'] * 1.2, centralised=centralised, max_pipeline_dist=max_pipeline_dist)
+
+        if pipeline == True:
+            total_nh3_options = [(cost_start_nh3 + cost_shipping_nh3 + cost_end_nh3), nh3_trucking_all_way, nh3_piping_all_way]
+        else:
+            total_nh3_options = [(cost_start_nh3 + cost_shipping_nh3 + cost_end_nh3), nh3_trucking_all_way]
+
         df.at[i, 'NH3 Cost'] = np.nanmin(total_nh3_options)
+
         total_lohc_options = [(cost_start_lohc + cost_shipping_lohc + cost_end_lohc),
                               lohc_costs(truck_dist=df.at[i, 'Driving Dist.'], centralised=centralised)]
         df.at[i, 'LOHC Cost'] = np.nanmin(total_lohc_options)
+
         total_h2_liq_options = [(cost_start_h2_liq + cost_shipping_h2_liq + cost_end_h2_liq),
                                 h2_liq_costs(truck_dist=df.at[i, 'Driving Dist.'], centralised=centralised)]
         df.at[i, 'H2 Liq Cost'] = np.nanmin(total_h2_liq_options)
-        total_h2_gas_options = [h2_gas_costs(truck_dist=df.at[i, 'Driving Dist.']),
-                                h2_gas_costs(pipe_dist=df.at[i, 'Direct Dist.'], pipeline=pipeline,
-                                             max_pipeline_dist=max_pipeline_dist)]
+
+        h2_gas_trucking_all_way = h2_gas_trucking_costs(truck_dist=df.at[i, 'Driving Dist.'])
+        h2_gas_piping_all_way = h2_gas_piping_costs(pipe_dist=df.at[i, 'Direct Dist.'] * 1.2, max_pipeline_dist=max_pipeline_dist)
+
+        if pipeline == True:
+            total_h2_gas_options = [h2_gas_trucking_all_way, h2_gas_piping_all_way]
+        else:
+            total_h2_gas_options = [h2_gas_trucking_all_way]
+
         df.at[i, 'H2 Gas Cost'] = np.nanmin(total_h2_gas_options)
 
         total_total_options = [df.at[i, 'NH3 Cost'], df.at[i, 'LOHC Cost'], df.at[i, 'H2 Liq Cost'],
@@ -202,7 +230,7 @@ def mc_transport_costs(df, end_plant_tuple, h2_demand, cost_end_nh3, cost_end_lo
     return df
 
 
-def initial_geo_calcs(df, end_plant_tuple, centralised=True, pipeline=True, max_pipeline_dist=10000):
+def initial_geo_calcs(df, end_plant_tuple, centralised=True, pipeline=True, max_pipeline_dist=2000):
     df, end_port_tuple = check_port_path(df, end_plant_tuple)
 
     # Get straight line distance from end point to end port
@@ -213,23 +241,43 @@ def initial_geo_calcs(df, end_plant_tuple, centralised=True, pipeline=True, max_
         driving_distance_end = np.nan
 
     # Calculate minimum costs from end port to end location for all medium possibilities
-    end_nh3_options = [nh3_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised),
-                       nh3_costs(pipe_dist=direct_distance_end * 1.2, convert=False, centralised=centralised,
-                                 pipeline=pipeline, max_pipeline_dist=max_pipeline_dist),
-                       h2_gas_costs(pipe_dist=direct_distance_end * 1.2, pipeline=pipeline,
-                                    max_pipeline_dist=max_pipeline_dist),
-                       h2_gas_costs(truck_dist=driving_distance_end)]
+    """NH3"""
+    nh3_port_to_loc_end_trucking = nh3_trucking_costs(truck_dist=driving_distance_end, convert=False,
+                                                      centralised=centralised)
+    nh3_port_to_loc_end_piping = nh3_piping_costs(pipe_dist=direct_distance_end * 1.2, convert=False,
+                                                  centralised=centralised, max_pipeline_dist=max_pipeline_dist)
+    h2_gas_port_to_loc_end_trucking = h2_gas_trucking_costs(truck_dist=driving_distance_end)
+    h2_gas_port_to_loc_end_piping = h2_gas_piping_costs(pipe_dist=direct_distance_end * 1.2,
+                                                        max_pipeline_dist=max_pipeline_dist)
+
+    if pipeline == True:
+        end_nh3_options = [nh3_port_to_loc_end_trucking, nh3_port_to_loc_end_piping,
+                           h2_gas_port_to_loc_end_trucking, h2_gas_port_to_loc_end_piping]
+    else:
+        end_nh3_options = [nh3_port_to_loc_end_trucking, h2_gas_port_to_loc_end_trucking]
+
     cost_end_nh3 = np.nanmin(end_nh3_options)
-    end_lohc_options = [lohc_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised),
-                        h2_gas_costs(pipe_dist=direct_distance_end * 1.2, pipeline=pipeline,
-                                     max_pipeline_dist=max_pipeline_dist),
-                        h2_gas_costs(truck_dist=driving_distance_end)]
+
+    """LOHC"""
+    lohc_port_to_loc_end=lohc_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised)
+
+    if pipeline == True:
+        end_lohc_options=[lohc_port_to_loc_end, h2_gas_port_to_loc_end_trucking, h2_gas_port_to_loc_end_piping]
+    else:
+        end_lohc_options=[lohc_port_to_loc_end, h2_gas_port_to_loc_end_trucking]
+
     cost_end_lohc = np.nanmin(end_lohc_options)
-    end_h2_liq_options = [h2_liq_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised),
-                          h2_gas_costs(pipe_dist=direct_distance_end * 1.2, pipeline=pipeline,
-                                       max_pipeline_dist=max_pipeline_dist),
-                          h2_gas_costs(truck_dist=driving_distance_end)]
+
+    """liq. H2"""
+    h2_liq_port_to_loc_end=h2_liq_costs(truck_dist=driving_distance_end, convert=False, centralised=centralised)
+
+    if pipeline == True:
+        end_h2_liq_options = [h2_liq_port_to_loc_end, h2_gas_port_to_loc_end_trucking, h2_gas_port_to_loc_end_piping]
+    else:
+        end_h2_liq_options = [h2_liq_port_to_loc_end, h2_gas_port_to_loc_end_trucking]
+
     cost_end_h2_liq = np.nanmin(end_h2_liq_options)
+
 
     df['NH3 Cost'] = np.zeros(len(df))
     df['LOHC Cost'] = np.zeros(len(df))

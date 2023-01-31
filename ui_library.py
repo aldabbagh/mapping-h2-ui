@@ -29,7 +29,7 @@ class Computing:
         mindex = df.index.values[df['Total Cost per kg H2'] == min_cost]
         mindex = mindex[0]
 
-        final_path = get_path(df, end_tuple, centralised, pipeline)
+        final_path = get_path(df, end_tuple, centralised, pipeline, max_pipeline_dist)
         df['Transport Mode'] = ''
         df['Transport Mode'][mindex] = final_path
 
@@ -64,6 +64,6 @@ class Computing:
 
         min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec = print_basic_results(df)
 
-        final_path = get_path(df, end_tuple, centralised, pipeline)
+        final_path = get_path(df, end_tuple, centralised, pipeline, max_dist)
 
         return min_cost, mindex, cheapest_source, cheapest_medium, cheapest_elec, final_path
