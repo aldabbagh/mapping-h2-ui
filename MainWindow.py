@@ -358,7 +358,6 @@ class UiWindow(QMainWindow):
 
                 if button == QMessageBox.StandardButton.Ok:
                     print("Ok!")
-                    self.lat_lineedit.clear()
                     self.lat_lineedit.setStyleSheet("background-color: Linen")
 
     def validate_longitude(self):
@@ -386,7 +385,6 @@ class UiWindow(QMainWindow):
 
                 if button == QMessageBox.StandardButton.Ok:
                     print("Ok!")
-                    self.long_lineedit.clear()
                     self.long_lineedit.setStyleSheet("background-color: Linen")
 
     def validate_iterations(self):
