@@ -208,8 +208,15 @@ def get_path(df, end_plant_tuple, centralised, pipeline, max_pipeline_dist):
         h2_liq = 'H2 Liq Ship'
     elif h2_liq_options == 1:
         h2_liq = 'H2 Liq Truck'
-    total_h2_gas_options = [h2_gas_trucking_costs(truck_dist=driving_distance_total),
-                            h2_gas_piping_costs(pipe_dist=direct_distance_total * 1.2, max_pipeline_dist=max_pipeline_dist)]
+
+    h2_gas_trucking_all_way = h2_gas_trucking_costs(truck_dist=driving_distance_total)
+    h2_gas_piping_all_way = h2_gas_piping_costs(pipe_dist=direct_distance_total * 1.2, max_pipeline_dist=max_pipeline_dist)
+
+    if pipeline == True:
+        total_h2_gas_options = [h2_gas_trucking_all_way, h2_gas_piping_all_way]
+    else:
+        total_h2_gas_options = [h2_gas_trucking_all_way]
+
     try:
         h2_gas_options = total_h2_gas_options.index(np.nanmin(total_h2_gas_options))
         if h2_gas_options == 0:
