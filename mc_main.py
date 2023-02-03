@@ -102,9 +102,9 @@ class MonteCarloComputing:
             df['Total Yearly Cost'] = df['Yearly gen. cost'] + df['Yearly Transport Cost']
             df['Total Cost per kg H2'] = df['Gen. cost per kg H2'] + df['Transport Cost per kg H2']
 
-            total_cost_per_kg_h2[i, :] = df['Total Cost per kg H2'].values
-            generation_cost_per_kg[i, :] = df['Gen. cost per kg H2'].values
-            solar_cost[i, :] = df['Elec Cost Solar'].values
-            wind_cost[i, :] = df['Elec Cost Wind'].values
+            total_cost_per_kg_h2[i, :] = df['Total Cost per kg H2'].to_numpy()
+            generation_cost_per_kg[i, :] = df['Gen. cost per kg H2'].to_numpy()
+            solar_cost[i, :] = df['Elec Cost Solar'].to_numpy()
+            wind_cost[i, :] = df['Elec Cost Wind'].to_numpy()
 
         return df, total_cost_per_kg_h2, generation_cost_per_kg, solar_cost, wind_cost
