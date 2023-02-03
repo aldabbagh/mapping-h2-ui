@@ -706,7 +706,7 @@ class Visualizing(QWidget):
                     outlinecolor="rgba(68, 68, 68, 0)",
                     ticks="outside",
                     showticksuffix="last",
-                    dtick=1)
+                    dtick=5)
             ),
         ))
 
