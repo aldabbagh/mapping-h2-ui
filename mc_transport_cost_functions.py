@@ -22,7 +22,7 @@ def nh3_trucking_costs(truck_dist, convert=True, centralised=True):
         reconversion = 0
         export = 0
 
-    truck = 0.0008 * truck_dist + 0.0664
+    truck = np.random.triangular(0.00072, 0.0008, 0.00088) * truck_dist + 0.0664
 
     return conversion + export + truck + reconversion
 
