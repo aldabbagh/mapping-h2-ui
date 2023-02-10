@@ -153,8 +153,10 @@ class UiWindow(QMainWindow):
                                      "the higher the number of iterations the higher the computation time will be. "
                                      "\nIf you are satisfied with your inputs you can click on the 'run model' button "
                                      "to start the calculation. The program window will become unresponsive for the "
-                                     "duration of the model run. Running times can vary between 15 and 60 minutes "
-                                     "depending on the complexity of the model and the computer hardware used. ")
+                                     "duration of the model run. Running times can vary between 15 and 60 minutes for "
+                                     "a single run and up to 16 hours for a Monte Carlo run with 1000 iterations."
+                                     "Depending on the number of iterations and the computer hardware used "
+                                     "these numbers may vary. ")
 
         # creates a button to start the model run and to open the sidebar for mapping of results
         self.run_button = QPushButton("Run Model")
