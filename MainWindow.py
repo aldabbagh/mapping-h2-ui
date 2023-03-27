@@ -3,7 +3,7 @@ import ui_library
 import ParameterSet
 import mc_main
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QDoubleValidator, QIntValidator
+from PyQt6.QtGui import QDoubleValidator, QIntValidator, QAction
 from PyQt6.QtCore import *
 import math
 import DisplayMap
@@ -17,6 +17,13 @@ class UiWindow(QMainWindow):
 
         self.window = QWidget()
         self.window.setStyleSheet(" background-color: MintCream ")
+
+        showLicenseAction = QAction("&Show License", self)
+        showLicenseAction.triggered.connect(self.display_license)
+
+        menu = self.menuBar()
+        licenseMenu = menu.addMenu('&Licensing information')
+        licenseMenu.addAction(showLicenseAction)
 
         self.grid = QGridLayout()
 
@@ -334,6 +341,23 @@ class UiWindow(QMainWindow):
         self.file_dialogue.setLayout(self.file_dialogue_layout)
         self.display_map.setWidget(self.file_dialogue)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.display_map)
+
+    def display_license(self):
+        licdlg = QDialog(self)
+        licdlg.setWindowTitle("Licensing information")
+        licdlg.setMinimumWidth(550)
+
+        textEdit = QTextEdit(readOnly=True)
+
+        layout = QVBoxLayout()
+        layout.addWidget(textEdit)
+        licdlg.setLayout(layout)
+
+        with open('GPL.txt') as f:
+            contents = f.read()
+
+        textEdit.setText(contents)
+        licdlg.exec()
 
     def validate_latitude(self):
         """Validation method to check if the user input in the Latitude LineEdit is between bounds."""
